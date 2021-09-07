@@ -1,0 +1,196 @@
+\documentclass[10pt,a4paper,oneside]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{stmaryrd}
+\usepackage{cmll}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{proof}
+\usepackage{tikz}
+\usepackage{multicol}
+
+\makeatletter
+\newcommand{\dotminus}{\mathbin{\text{\@dotminus}}}
+
+\newcommand{\@dotminus}{%
+  \ooalign{\hidewidth\raise1ex\hbox{.}\hidewidth\cr$\m@th-$\cr}%
+}
+\makeatother
+
+\usetikzlibrary{arrows,backgrounds,patterns,matrix,shapes,fit,calc,shadows,plotmarks}
+
+\newtheorem{definition}{Определение}
+\begin{document}
+
+\begin{center}{\Large\textsc{\textbf{Теоретические домашние задания}}}\\
+             \it Теория типов, ИТМО, М3235-М3239, осень 2021 года\end{center}
+
+\section*{Домашнее задание №1: <<вводная лекция>>}
+
+\begin{enumerate}
+
+\item Напомним правила расстановки скобок в лямбда-выражениях. Лямбда-абстракция ведёт себя жадно: 
+включает всё, что может. Пример: $\lambda z.(\lambda x.a\ b\ c\ \lambda y.d\ e)\ f$ 
+эквивалентно $\lambda z.((\lambda x.(a\ b\ c\ (\lambda y.(d\ e))))\ f)$.
+В аппликациях скобки расставляются слева направо:
+$\lambda z.(\lambda x.(a\ b\ c\ (\lambda y.(d\ e))))\ f$ можно преобразовать в  
+$(\lambda z.((\lambda x.((((a\ b)\ c)\ (\lambda y.(d\ e)))))\ f))$.
+
+\begin{enumerate}
+\item Расставьте скобки в выражении:
+$\lambda z.\lambda x.a\ b\ c\ \lambda y.d\ e\ f$
+\item Уберите все <<лишние>> скобки из выражения:
+$(\lambda f.((\lambda x.(f\ (f\ (x\ (\lambda z.(z\ x))))))\ z))$
+\item Всегда ли лишние скобки можно убрать единственным образом (когда из результирующего
+выражения нельзя больше убрать ни одной пары скобок)? Докажите или опровергните.
+\end{enumerate}
+
+\item Напомним определения с лекций:
+
+\begin{tabular}{lll}
+Обозначение & лямбда-терм & название\\\hline
+$T$ & $\lambda a.\lambda b.a$ & истина\\
+$F$ & $\lambda a.\lambda b.b$ & ложь\\
+$Not$ & $\lambda x.x\ F\ T$ & отрицание\\
+$And$ & $\lambda x.\lambda y.x\ y\ F$ & конъюнкция
+\end{tabular}
+
+Проредуцируйте следующие выражения и найдите нормальную форму:
+
+\begin{enumerate}
+\item $T\ F$
+\item $(T\ Not\ (\lambda t.t))\ F$
+\item $And\ (And\ F\ F)\ T$
+\end{enumerate}
+
+\item Постройте лямбда-выражения для следующих булевских выражений:
+\begin{enumerate}
+\item Дизъюнкция
+\item Штрих Шеффера (<<и-не>>)
+\item Исключающее или
+\end{enumerate}
+
+\item Напомним определения с лекций:
+
+$$f^{(n)}\ X ::= \left\{\begin{array}{ll} X, & n=0\\
+                                f^{(n-1)}\ (f\ X), & n>0\end{array}\right.$$
+
+\begin{center}\begin{tabular}{lll}
+Обозначение & лямбда-терм & название\\\hline
+$\overline{n}$ & $\lambda f.\lambda x.f^{(n)}\ x$ & чёрчевский нумерал\\
+$(+1)$ & $\lambda n.\lambda f.\lambda x.n\ f\ (f\ x)$ & прибавление 1\\
+$(+)$ & $\lambda a.\lambda b.a\ (+1)\ b$ & сложение\\
+$(\cdot)$ & $\lambda a.\lambda b.a\ ((+)\ b)\ \overline{0}$ & умножение
+\end{tabular}\end{center}
+
+Используя данные определения, постройте выражения для следующих операций над числами:
+
+\begin{enumerate}
+\item Умножение на 2 ($Mul2$)
+\item Умножение
+\item Возведение в степень
+\item Проверка на чётность
+\item IsZero: возвращает $T$, если аргумент равен нулю, иначе $F$
+\end{enumerate}
+
+\item Напомним определения с лекций:
+
+\begin{tabular}{lll}
+Обозначение & лямбда-терм & название\\\hline
+$MkPair$ & $\lambda a.\lambda b.(\lambda x.x\ a\ b)$ & создание пары\\
+$PrL$ & $\lambda p.p\ T$ & левая проекция\\
+$PrR$ & $\lambda p.p\ F$ & правая проекция\\\hline
+\end{tabular}
+
+\begin{enumerate}
+\item Убедитесь, что $PrL\ (MkPair\ a\ b) \twoheadrightarrow_\beta a$.
+\item Постройте операцию вычитания 1 из числа
+\item Постройте операцию вычитания чисел
+\item Постройте операцию деления на 3 (могут потребоваться пары и/или вычитания)
+\item Постройте операцию деления чисел
+\item Сравнение двух чисел ($IsLess$) — истина, если первый аргумент меньше второго.
+\end{enumerate}
+
+\item Существует ли выражение $A$, что существуют такие выражения $B$ и $C$, что
+$A \rightarrow_\beta B$ и $A \rightarrow_\beta C$, но $B$ и $C$ различны?
+
+\item Будем говорить, что лямбда-выражение находится в нормальной форме, если в нём невозможно
+провести бета-редукции. Нормальной формой выражения называется результат (возможно, многократной)
+его бета-редукции, находящийся в нормальной форме. 
+Проредуцируйте выражение и найдите его нормальную форму: 
+\begin{enumerate}
+\item $\overline{2}\ \overline{2}$
+\item $\overline{2}\ \overline{2}\ \overline{2}$
+\item $\overline{2}\ \overline{2}\ \overline{2}\ \overline{2}\ \overline{2}\ \overline{2}\ \overline{2}$
+\end{enumerate}
+
+\item Напомним определение Y-комбинатора: $\lambda f.(\lambda x.f\ (x\ x))\ (\lambda x.f\ (x\ x))$.
+Напомним, что отношение бета-эквивалентности $(=_\beta)$ есть транзитивное, рефлексивное и симметричное
+замыкание отношения бета-редукции. Будем говорить, что выражение не имеет нормальной формы, если
+никакая конечная последовательность его бета-редукций не приводит к выражению в нормальной форме.
+\begin{enumerate}
+\item Покажите, что $Y\ f =_\beta f\ (Y\ f)$.
+\item Покажите, что выражение $Y\ f$ не имеет нормальной формы;
+\item Покажите, что выражение $Y\ (\lambda f.\overline{0})$ имеет нормальную форму.
+\item Покажите, что выражение $Y\ (\lambda f.\lambda x.(IsZero\ x)\ \overline{0}\ (f\ Minus1\ x))\ 2$ имеет нормальную форму.
+\item Какова нормальная форма выражения $Y\ (\lambda f.\lambda x.(IsZero\ x)\ \overline{0}\ ((+1)\ (f\ Minus1\ x)))\ \overline{n}$?
+\item Какова нормальная форма выражения $Y\ (\lambda f.\lambda x.(IsZero\ x)\ \overline{1}\ (Mul2\ (f\ Minus1\ x)))\ \overline{n}$?
+\item Определите с помощью $Y$-комбинатора функцию для вычисления $n$-го числа Фибоначчи.
+\end{enumerate}
+
+\item Определим на языке Хаскель следующую функцию: \verb!show_church n = show (n (+1) 0)!
+Убедитесь, что \verb!show_church (\f -> \x -> f (f x))! вернёт 2. 
+Пользуясь данным определением и его идеей, реализуйте следующие функции:
+
+\begin{enumerate}
+\item \verb!int_to_church! --- возвращает чёрчевский нумерал (т.е. функцию от двух аргументов) по целому числу.
+Каков точный тип результата этой функции?
+\item сложение двух чёрчевских нумералов.
+\item умножение двух чёрчевских нумералов.
+\item можно ли определить функцию вычитания 1 и вычитания двух чисел? Что получается, а что --- нет?
+\end{enumerate}
+
+\item Бесконечное количество комбинаторов неподвижной точки. Дадим следующие определения
+$$\begin{array}{l}
+L := \lambda abcdefghijklmnopqstuvwxyzr.r(thisisafixedpointcombinator)\\
+R := LLLLLLLLLLLLLLLLLLLLLLLLLL\end{array}$$
+В данном определении терм $R$ является комбинатором неподвижной точки: каков бы ни был терм
+$F$, выполнено $R\ F =_\beta F\ (R\ F)$.
+\begin{enumerate}
+\item Докажите, что данный комбинатор --- действительно комбинатор неподвижной точки.
+\item Пусть в качестве имён переменных разрешены русские буквы. Постройте аналогичное выражение
+по-русски: с 32 параметрами (без ё) и осмысленной русской фразой в терме $L$; покажите, что оно является
+комбинатором неподвижной точки.
+\end{enumerate}
+
+\item Дадим определение: комбинатор --- лямбда-выражение без свободных переменных.
+
+Также напомним определение:
+$$\begin{array}{l}
+S := \lambda x.\lambda y.\lambda z.x\ z\ (y\ z)\\
+K := \lambda x.\lambda y.x\\
+I := \lambda x.x
+\end{array}$$
+
+Известна теорема о том, что для любого комбинатора $X$ можно найти выражение $P$
+(состоящее только из скобок, пробелов и комбинаторов $S$ и $K$), что $X =_\beta P$.
+Будем говорить, что комбинатор $P$ \emph{выражает} комбинатор $X$ в базисе $SK$.
+
+Выразите в базисе $SK$:
+\begin{enumerate}
+\item $F = \lambda x.\lambda y.y$
+\item $\overline{1}$
+\item $Not$
+\item $Xor$
+\item $InL$
+\item $\overline{n}$
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}
