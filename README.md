@@ -26,3 +26,13 @@ https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 ### Где почитать
 + Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
 https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
+
+## Лекция 3
+### Просто типизированное лямбда-исчисление
++ Язык просто типизированного исчисления (типы, контекст)
++ Типизация по Чёрчу и по Карри.
++ Правила вывода
++ Теоремы о типизации редукции, Чёрча-Россера, об уникальности типизации по Чёрчу.
+### Где почитать
++ Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
+https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
