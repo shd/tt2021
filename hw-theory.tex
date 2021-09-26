@@ -266,4 +266,83 @@ length (Cons _ tail) = length tail + 1
 
 \end{enumerate}
 
+\section*{Домашнее задание №3: <<просто-типизированное лямбда исчисление>>}
+
+\begin{enumerate}
+\item Оцените временн\'{у}ю сложность сложения, вычитания, умножения, деления, вычисления факториала 
+(реализация с помощью $Y$-комбинатора) для чёрчевских нумералов в лямбда-исчислении.
+
+\item Докажите обитаемость следующих типов с помощью вывода 
+в просто-типизированном лямбда-исчислении и с помощью программы на Хаскеле.
+\begin{enumerate}
+\item $(\alpha\rightarrow\beta\rightarrow\gamma)\rightarrow(\beta\rightarrow\alpha\rightarrow\gamma)$
+\item $(\alpha\rightarrow\alpha\rightarrow\beta)\rightarrow(\alpha\rightarrow\beta)$
+\end{enumerate}
+
+\item Лемма о расширении типа: докажите, что если $\Gamma\vdash A:\tau$, $\Gamma\vdash B: \sigma$,
+$A \rightarrow_\beta B$, то $\Gamma\vdash A: \sigma$.
+
+\item Верно ли, что если $A =_\beta B$, $\vdash A: \tau$ и $\vdash B: \sigma$, то $\vdash B: \tau$? 
+Докажите или приведите опровергающий контрпример.
+
+\item Рассмотрим остальные базовые логические связки ($\with$, $\vee$, $\bot$) и соответствующие
+им расширенные лямбда-выражения:
+
+\vspace{2mm}
+\begin{tabular}{cp{5mm}cp{5mm}c}
+	\infer{\Gamma \vdash \langle A, B \rangle: \varphi \with \psi}{\Gamma\vdash A: \varphi \;\;\;\; \Gamma\vdash B: \psi} &&
+	\infer{\Gamma \vdash \pi_l \langle A, B \rangle : \varphi}{\Gamma \vdash \langle A, B \rangle: \varphi \with \psi} &&
+	\infer{\Gamma \vdash \pi_r \langle A, B \rangle : \psi}{\Gamma \vdash \langle A, B \rangle: \varphi \with \psi}
+\\ \\
+	\infer{\Gamma \vdash \textbf{in}_l \; A: \varphi \vee \psi}{\Gamma\vdash A: \varphi}&&
+	\infer{\Gamma \vdash \textbf{in}_r \; B: \varphi \vee \psi}{\Gamma\vdash B: \psi}&&
+	\infer{\textbf{case} \; L \; f \; g : \tau}{\Gamma \vdash L: \varphi \vee \psi \;\;\; \Gamma \vdash f : \varphi \to \tau \;\;\; \Gamma \vdash g: \psi \to \tau}
+
+\\ \\
+ &&	\infer{\Gamma \vdash A : \tau}{\Gamma \vdash A: \bot}
+
+\end{tabular}
+\vspace{2mm}
+
+Конструкции $\langle A,B\rangle$, $\textbf{case}$ и им подобные --- это новые конструкции для записи выражений:
+запись $\lambda x.\langle x,\lambda y.\textbf{in}_l\ x\rangle$ вполне возможна.
+Конечно, в бестиповом исчислении $\langle A,B\rangle$ может быть задано как терм $\lambda p.p\ A\ B$, но
+в просто-типизированном исчислении выразительной силы языка для его типизации не хватит, потому
+мы ввели специальные конструкции со своими специальными правилами типизации.
+Заметьте, что правила введения лжи не существует (иначе теория станет противоречивой).
+
+В каждом из подзаданий напишите: (i) лямбда-выражения, доказывающие утверждения,
+(ii) соответствующие им программы на Хаскеле, (iii) а также покажите, что эти выражения действительно имеют соответствующий тип
+($\alpha\rightarrow\bot$ обозначим как $\neg\alpha$).
+\begin{enumerate}
+\item $\alpha\vee\beta\rightarrow\neg(\neg\alpha\with\neg\beta)$
+\item $\alpha\with\beta\rightarrow\neg(\neg\alpha\vee\neg\beta)$
+\item $\alpha\with(\beta\vee\gamma)\rightarrow(\alpha\with\beta)\vee(\alpha\with\gamma)$
+\item $(\alpha\rightarrow\beta)\rightarrow(\neg\beta\rightarrow\neg\alpha)$
+\item $\alpha\rightarrow\neg\alpha\rightarrow\beta$
+\end{enumerate}
+
+\item Зафиксируем атомарный тип $\alpha$ и определим $\eta$ как $(\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$.
+Пусть $\vdash A:\eta\rightarrow\eta\rightarrow\eta$, $M\equiv\overline{m}$, $N\equiv\overline{n}$, и $f$ --- некоторая
+свободная переменная типа $\alpha\rightarrow\alpha$.
+Покажите, что:
+\begin{enumerate}
+\item Cложение и умножение имеют тип $\eta\rightarrow\eta\rightarrow\eta$ (указание: не каждая реализация этих операций имеет такой тип).
+\item Любое подвыражение внутри нормальной формы $A\ M\ N\ f$ имеет тип либо $\alpha$, либо $\alpha\rightarrow\alpha$, либо $\eta$.
+\item Тип $\eta$ внутри нормальной формы $A\ M\ N\ f$ могут иметь только термы $M$ и $N$.
+\item Тип $\alpha\rightarrow\alpha$ внутри нормальной формы $A\ M\ N\ f$ могут иметь только термы 
+\begin{enumerate}\item $f$; \item $M\ X$ и $N\ X$ при некотором $X$;
+\item $\lambda x.S_1\ (S_2\ \dots (S_k\ y)\ ))$, где $S_i \equiv h$, либо $S_i \equiv M\ X$, либо $S_i \equiv N\ X$ при некотором $X$.\end{enumerate}
+\item Обозначим за $X^n(x)$ $n$-кратное применение $X$ к аргументу $x$, а за $P(m,n)$ --- полином от $m$ и $g$.
+Тогда любое выражение $S: \alpha\rightarrow\alpha$, являющееся подвыражением нормальной формы $A\ M\ N\ f$, есть либо полином применений $f$
+к аргументу ($S =_\beta \lambda x.f^{P(m,n)}(x)$), либо константная функция ($S =_\beta \lambda x.f^{P(m,n)}(y)$, $x \not\equiv y$).
+\item Пусть $E(m,n)$ --- \emph{расширенный полином} ($P_i$ --- натуральные полиномы, $c$ --- некоторая натуральная константа):
+$$E(m,n) = \left\{\begin{array}{ll}P_1(m,n)&m > 0,\ n > 0\\P_2(m)&m > 0,\ n =0\\P_3(n)&m = 0,\ n > 0\\c&m = 0,\ n = 0\end{array}\right.$$
+Покажите, что любая функция, имеющая тип $\eta$, вычисляет некоторый расширенный полином.
+То есть, если $A:\eta\rightarrow\eta\rightarrow\eta$, то найдётся такой $E(m,n)$, что при всех $m,n \in \mathbb{N}_0$ выполнено
+$A\ M\ N =_\beta \overline{E(m,n)}$.
+\end{enumerate}
+
+\end{enumerate}
+
 \end{document}
