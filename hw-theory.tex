@@ -345,4 +345,20 @@ $A\ M\ N =_\beta \overline{E(m,n)}$.
 
 \end{enumerate}
 
+\section*{Домашнее задание №4: <<просто-типизированное лямбда исчисление>>}
+\begin{enumerate}
+\item Сформулируйте аксиомы для просто типизированного исчисления по Чёрчу. 
+\emph{Указание:} аксиомы должны быть согласованы с типами аргументов
+лямбда-абстракций.
+\item Рассмотрим типизацию по Чёрчу. Определим стирающее преобразование $|\cdot|: \Lambda \rightarrow \Lambda_\textrm{ч}$:
+
+$$|A| = \left\{ \begin{array}{ll} \alpha,& A = \alpha\\
+                                  |P| |Q|,& A = P Q\\
+                                  \lambda x.|P|,& A = \lambda x^\tau.P \end{array}  \right.$$
+
+Верно ли следующее: если $P \rightarrow_\beta Q$ и $|P'|=P$, $|Q'|=Q$, то $P'\rightarrow_\beta Q'$.
+\item Покажите, что если $A =_\alpha B$ и $\Gamma\vdash A:\tau$, то $\Gamma\vdash B:\tau$ (или, иными словами,
+доказательство не зависит от выбора пред-лямбда-терма).
+\end{enumerate}
+
 \end{document}
