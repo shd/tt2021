@@ -361,4 +361,50 @@ $$|A| = \left\{ \begin{array}{ll} \alpha,& A = \alpha\\
 доказательство не зависит от выбора пред-лямбда-терма).
 \end{enumerate}
 
+\section*{Домашнее задание №5: <<логика второго порядка, система F>>}
+\begin{enumerate}
+\item Будем говорить, что связка $\alpha\star\beta$ \emph{выражается} через формулу $F(\alpha,\beta)$,
+если в правила вывода для связки $\star$ после замены связок на формулы превращаются в теоремы.
+Как уже было упомянуто на лекции, логические операции могут быть выражены через следующие выражения
+в логике второго порядка:
+$$\alpha\with\beta \equiv \forall\xi.(\alpha\rightarrow\beta\rightarrow\xi)\rightarrow\xi$$
+$$\alpha\vee\beta \equiv \forall\xi.(\alpha\rightarrow\xi)\rightarrow(\beta\rightarrow\xi)\rightarrow\xi$$
+$$\bot \equiv \forall\xi.\xi$$
+$$\exists \alpha.\varphi \equiv \forall\xi.(\forall\alpha.\varphi\rightarrow\xi)\rightarrow\xi$$
+Покажите, что правила вывода (аналогичны правилам исчисления высказываний)
+превратятся в теоремы для:
+\begin{enumerate}
+\item конъюнкции (3 правила);
+\item дизъюнкции (3 правила);
+\item квантора существования. Данные правила ранее не приводились, поэтому укажем их:
+$$\infer{\Gamma\vdash\exists p.\varphi}{\Gamma\vdash\varphi[p := \theta]} \quad\quad\quad\quad
+  \infer[p \notin FV(\Gamma)]{\Gamma\vdash\psi}{\Gamma\vdash\exists p.\varphi\;\;\;\Gamma,\varphi\vdash\psi}$$
+\item Покажите, что ограничение $p\notin FV(\Gamma)$ существенно в правиле удаления квантора существования.
+\end{enumerate}
+\item Покажите, что если принять $\langle A,B\rangle^{\alpha\with\beta} \equiv \Lambda\xi.\lambda p^{\alpha\rightarrow\beta\rightarrow\xi}.p\ A\ B$,
+то правила для $\alpha\with\beta$ соответствуют правилам вывода для упорядоченной пары в системе F 
+(правила достаются по наследству из $\lambda_\rightarrow$).
+\item Покажите, что если принять $\textbf{in}_L A^{\alpha\vee\beta} \equiv \Lambda\xi.\lambda p^{\alpha\rightarrow\xi}.\lambda q^{\beta\rightarrow\xi}.p\ A$
+(аналогично, $\textbf{in}_R B^{\alpha\vee\beta} \equiv \Lambda\xi.\lambda p^{\alpha\rightarrow\xi}.\lambda q^{\beta\rightarrow\xi}.q\ B$),
+то правила для $\alpha\vee\beta$ соответствуют правилам вывода для алгебраического типа в системе F.
+\item Пусть чёрчевский нумерал задаётся как $\Lambda\alpha.\lambda f^{\alpha\rightarrow\alpha}.\lambda x^\alpha.f^n\ x$.
+Соответственно, целочисленный тип будет $\eta = \forall\alpha.(\alpha\rightarrow\alpha)\rightarrow(\alpha\rightarrow\alpha)$.
+Покажите, что следующие операции выразимы в системе $F$ (то есть, существует лямбда-выражение $f_\star: \eta\rightarrow\eta\rightarrow\eta$,
+что $f_\star\ \overline{m}\ \overline{n} =_\beta \overline{m \star n}$):
+\begin{enumerate}
+\item умножение;
+\item вычитание 1;
+\item вычитание;
+\item возведение в степень.
+\end{enumerate}
+\item Определите (аналогично предыдущему пункту) полиморфный тип для булевского выражения и покажите выразимость
+в нём:
+\begin{enumerate}
+\item отрицания;
+\item операции \verb!Xor!.
+\end{enumerate}
+\item Покажите, что $Y$-комбинатор не типизируется по Карри в системе $F$.
+\item Покажите, что $(\lambda x.x\ x)\ (\lambda z.z\ y\ z)$ типизируется по Карри в системе $F$.
+\end{enumerate}
+
 \end{document}
