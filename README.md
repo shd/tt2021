@@ -36,3 +36,30 @@ https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 ### Где почитать
 + Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
 https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
+
+## Лекция 4
+### Импликационный фрагмент интуиционистского исчисления высказываний
++ Импликационный фрагмент интуиционистского исчисления высказываний
++ Три задачи (проверка обитаемости, проверка типа, вывод типа)
+### Где почитать
++ Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
+https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
+
+## Лекция 5
+### Вывод типа. Введение в исчисление предикатов второго порядка
++ Задача унификации
++ Вывод типа в просто типизированном лямбда-исчислении
++ Исчисление предикатов второго порядка и система F, введение
+### Где почитать
++ Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
+https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
+
+## Лекция 6
+### Система F. Экзистенциальные типы
++ Правила для кванторов существования
++ Экзистенциальные типы
+### Где почитать
++ Morten Heine B. Sørensen, Pawel Urzyczyn: Lections on the Curry-Howard Isomorphism
+https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
++ John C. Mitchell, Gordon D. Plotkin, Abstract Types Have Existential Type
+http://homepages.inf.ed.ac.uk/gdp/publications/Abstract_existential.pdf
