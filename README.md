@@ -63,3 +63,16 @@ https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 https://disi.unitn.it/~bernardi/RSISE11/Papers/curry-howard.pdf
 + John C. Mitchell, Gordon D. Plotkin, Abstract Types Have Existential Type
 http://homepages.inf.ed.ac.uk/gdp/publications/Abstract_existential.pdf
+
+## Лекция 7
+### Система Хиндли-Милнера.
++ Ранг типа
++ Аксиоматика
++ Алгоритм W
++ Расширения системы: экви- и изорекурсивные типы, тип для Y-комбинатора
+### Где почитать
++ Luis Damas and Robin Milner, Principal type-schemes for functional programs
+POPL'82: Proceedings of the 9th ACM SIGPLAN-SIGACT symposium on Principles of programming languages, ACM, pp. 207–212
++ Robin Milner, A theory of type polymorphism in programming (1978) // Journal of Computer and System Sciences, 1978, vol. 17, pp. 348--375
+https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.5276
++ Бенджамин Пирс, Типы в языках программирования. Издательство «Лямбда пресс» & «Добросвет», Москва, 2011
