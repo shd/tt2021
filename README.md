@@ -76,3 +76,13 @@ POPL'82: Proceedings of the 9th ACM SIGPLAN-SIGACT symposium on Principles of pr
 + Robin Milner, A theory of type polymorphism in programming (1978) // Journal of Computer and System Sciences, 1978, vol. 17, pp. 348--375
 https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.5276
 + Бенджамин Пирс, Типы в языках программирования. Издательство «Лямбда пресс» & «Добросвет», Москва, 2011
+
+## Лекция 8
+### Обобщённые типовые системы. Лямбда-куб Барендрегта
++ Аксиоматика
++ Лямбда-куб
++ Зависимые типы, примеры зависимых типов в языках программирования
++ Языки программирования на лямбда-кубе.
+### Где почитать
++ Henk Barendregt, Introduction to generalized type systems.
+Journal of Functional Programming 1 (2): 125-154, April 1991
