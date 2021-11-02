@@ -86,3 +86,13 @@ https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.5276
 ### Где почитать
 + Henk Barendregt, Introduction to generalized type systems.
 Journal of Functional Programming 1 (2): 125-154, April 1991
+
+## Лекция 9
+### Изоморфизм Карри-Ховарда-Воеводского. Язык Аренд.
++ Непрерывные функции
++ Связные множества, линейная связность, пути
++ Изоморфизм Карри-Ховарда-Воеводского
++ Равенство в Аренд. Простейшие примеры программ на Аренд.
+### Где почитать
++ Аренд - язык с зависимыми типами, основанный на HoTT
+https://habr.com/ru/company/JetBrains-education/blog/469569/
