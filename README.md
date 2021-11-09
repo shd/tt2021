@@ -88,11 +88,30 @@ https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.5276
 Journal of Functional Programming 1 (2): 125-154, April 1991
 
 ## Лекция 9
-### Изоморфизм Карри-Ховарда-Воеводского. Язык Аренд.
+### Введение в гомотопическую теорию типов, язык Аренд
++ Интуиционистские типовые системы для формализации доказательств
++ Равенство, интенсиональные и экстенсиональные типовые системы
 + Непрерывные функции
 + Связные множества, линейная связность, пути
 + Изоморфизм Карри-Ховарда-Воеводского
 + Равенство в Аренд. Простейшие примеры программ на Аренд.
 ### Где почитать
-+ Аренд - язык с зависимыми типами, основанный на HoTT
++ Гомотопическая теория типов
+https://homotopytypetheory.org/book/
++ Cyril Cohen, Thierry Coquand, Simon Huber, Anders Mörtberg. 
+Cubical Type Theory: a constructive interpretation of the univalence axiom.
+https://arxiv.org/abs/1611.02108
++ Документация по языку Аренд
+https://arend-lang.github.io/documentation/
++ Arend – язык с зависимыми типами, основанный на HoTT (часть 1)
 https://habr.com/ru/company/JetBrains-education/blog/469569/
+
+## Лекция 10
+### Равенство в языке Аренд
++ Магия: элиминатор для интервального типа coe
++ Вспомогательные функции: transport, pmap
++ Типы Empty и Not. Доказательство неравенства
+### Где почитать
++ Документация по яызку Аренд, равенство и доказательства равенства
+https://arend-lang.github.io/documentation/tutorial/PartI/idtype
+https://arend-lang.github.io/documentation/tutorial/PartI/equalityex
