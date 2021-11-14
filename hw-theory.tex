@@ -572,4 +572,33 @@ $f(a) \rightsquigarrow f(b)$ для любой непрерывной функц
 \item Приведите примеры связных и несвязных типов в языках программирования. Как на этих типах задана топология?
 \end{enumerate}
 
+\section*{Домашнее задание №10: <<задачи на простые доказательства в Arend>>}
+\begin{enumerate}
+\item Докажите \verb!repl (A B : \Type) (eqProof : A = B) : A -> B! (если два типа равны, то существует функция между ними).
+\item Докажите коммутативность умножения: то есть обитаемость типа $\Pi x^\texttt{Nat}. \Pi y^\texttt{Nat}. x \cdot y = y \cdot x$
+\item Докажите дистрибутивность: $a \cdot (b + c) = a \cdot b + a \cdot c$.
+\item Определим понятие инъективной функции: 
+\begin{verbatim}\func inj (A B : \Type) (f : A -> B) => \Pi (a b : A) (eq : f a = f b) -> a = b\end{verbatim}
+\begin{enumerate}
+\item Докажите, что \verb!inj Nat Nat suc! обитаемо --- т.е. \verb!suc! инъективна.
+\item Докажите, что если $f: A \rightarrow B$ и $g: C \rightarrow D$ инъективны, то $\lambda p.\langle f\ \pi_L(p), g\ \pi_R(p)\rangle$ тоже
+инъективна.
+\item Докажите, что $x^2$ инъективна.
+\item Докажите, что если $f$ инъективна и $f(x)\ne f(y)$, то $x \ne y$.
+\end{enumerate}
+%\item Определим отношение порядка как упорядоченную пару \verb!\Sigma (C : \Type) (Rel : C -> C -> \Type)! (носитель $C$ 
+%и двуместный предикат $Rel$). 
+%\begin{enumerate}
+%\item Определите свойство рефлексивности и покажите, что --- рефлексивно.
+%\end{enumerate}
+\item Докажите, что $0 \ne x + 1$.
+\item Докажите, что если $a + b = a + c$, то $b = c$. Также докажите, что если $a + b \ne a + c$, то $b \ne c$.
+\item Докажите, что если $x = 2 \cdot x$, то $x = 0$.
+\item Докажите, что если $x^2 = x^3$, то $x = 0$ или $x=1$ (логическое или соответствует типу \verb!Or! из модуля \verb!Data.Or!).
+\item Докажите, что если $a + p = c$ и $a + q = c$, то $p = q$ (логическое и соответствует упорядоченной паре --- типу \verb!\Sigma!).
+\item Определите функцию ограниченного вычитания: $$S(a,b) = \begin{cases}a - b, & a \ge b\\0, & a < b\end{cases}$$
+Покажите, что $S(a+b,b)=a$.
+\item Определите операцию $2^n$ и покажите, что $2^{a+b} = 2^a \cdot 2^b$.
+\end{enumerate}
+
 \end{document}
