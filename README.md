@@ -115,3 +115,11 @@ https://habr.com/ru/company/JetBrains-education/blog/469569/
 + Документация по яызку Аренд, равенство и доказательства равенства
 https://arend-lang.github.io/documentation/tutorial/PartI/idtype
 https://arend-lang.github.io/documentation/tutorial/PartI/equalityex
+
+## Лекция 11
+### Типы данных, специальные конструкции
++ Неравенство: два способа определения (через экзистенциальный тип и через обобщённый алгебраический тип)
++ rewrite и contradiction
++ Set и Prop
+### Где почитать
++ Документация по яызку Аренд
