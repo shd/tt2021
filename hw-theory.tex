@@ -634,5 +634,38 @@ $b \preceq e$, $c \preceq e$, $d \preceq e$, причём $b,c,d$ несравн
 \item Покажите, что перестановки образуют группу (\verb!Group!).
 \end{enumerate}
 \end{enumerate}
+
+\section*{Домашнее задание №12: <<Универсумы, гомотопические уровни, фак\-тор-множества>>}
+
+\begin{enumerate}
+\item Пусть $\langle p_1,q_1 \rangle \approx \langle p_2,q_2 \rangle$, если $p_1 + q_2 = p_2 + q_1$.
+\begin{enumerate}
+\item Определите целые числа \verb!AltZ! как $\mathbb{Z}/\approx$, покажите, что они образуют кольцо (\verb!Ring!). 
+\item Покажите, что существует биекция \verb!AltZ! на \verb!Int!.
+\item Покажите, что равенство на \verb!AltZ! разрешимо.
+\end{enumerate}
+\item Покажите, что тип с разрешимым равенством --- \verb!Set!.
+\item Пусть $f : G \rightarrow H$ --- гомоморфизм групп. Покажите, что $H$ изоморфен $G/\ker f$ (гомоморфный образ группы
+изоморфен фактор-группе по ядру гомоморфизма).
+\item Есть ли какие-то аксиомы теории множеств в аксиоматике Цермело-Френкеля (не рассматривайте аксиомы выбора и подстановки), 
+которые не выполнены для \verb!Set!?
+\item Определите понятие мощности множества (\verb!Set!) в Аренде. Покажите, что мощность множества \verb!Bool! равна 2.
+\item Рассмотрим следующие определения:
+\begin{verbatim}
+\func ChurchT (x : \Type) => (x -> x) -> (x -> x)
+\func Church => \Pi (x : \Type) -> ChurchT x
+\func Zero : Church => \lam t f x => x
+
+\func inc (n : Church) : Church => \lam t f x => n t f (f x)
+\func add (a : Church) (b : Church) : Church => \lam t f x => a t f (b t f x)
+\end{verbatim}
+
+И так далее. Возможно ли определить (более-менее следуя реализации операций для бестипового исчисления,
+развивая определения выше):
+\begin{enumerate}
+\item Операцию <<деление на три>> (естественно, в версии, не использующей $Y$-комбинатор)?
+\item Операцию возведения в степень, определявшуюся как $\lambda m.\lambda n.n\ m$?
+\end{enumerate}
+\end{enumerate}
                                
 \end{document}
