@@ -714,7 +714,7 @@ $(\exists x.\alpha(x))\with(\forall x.\forall y.\alpha(x)\with\alpha(y)\rightarr
 следующем типе <<простое число>> данная функция должна доказать, что любые два значения типа при данном $x$ равны:
 
 \begin{verbatim}
-\data Div3 (x : Nat) \elim x
+\data Div3 (x : Nat)
   | remainder-zero (Exists (p : Nat) (p Nat.* 3 = x))
   | remainder-one (Exists (p : Nat) (p Nat.* 3 Nat.+ 1 = x))
   | remainder-two (Exists (p : Nat) (p Nat.* 3 Nat.+ 2 = x))
