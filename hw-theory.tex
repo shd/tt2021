@@ -738,7 +738,7 @@ $(\exists x.\alpha(x))\with(\forall x.\forall y.\alpha(x)\with\alpha(y)\rightarr
 | sure P
 | nope (P -> Empty)
 | neither ((P || (P -> Empty)) -> Empty)
-\where \use \level superDecProp {P : \Prop} (a b : AbsolutelyDec P): a = b => {?}
+\where \use \level superDecProp {P : \Prop} (a b : SuperDec P): a = b => {?}
 \end{verbatim}
 вариант \verb!neither! невозможен (также, заполните пропущенное доказательство \verb!superDecProp!).
 \end{enumerate}
