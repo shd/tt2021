@@ -158,3 +158,11 @@ https://coq.inria.fr/library/Coq.Logic.Hurkens.html
 ### Где прочесть
 + Philip Wadler. A taste of linear logic
 + Edsko de Vries, Rinus Plasmeijer, David M Abrahamson. Uniqueness Typing Simplified
+
+## Лекция 16
+### Система F-Sub
++ Общие понятия (что такое подтип, ко- и контравариантность)
++ Система F<:
++ Полный и ядерный вариант системы F<:
+### Где прочесть
++ Бенджамин Пирс, Типы в языках программирования. Издательство «Лямбда пресс» & «Добросвет». Москва, 2011
