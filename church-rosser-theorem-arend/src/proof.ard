@@ -1,0 +1,96 @@
+\import Algebra.Meta
+\import Algebra.Ordered
+\import Arith.Nat
+\import Data.Bool
+\import Debug.Meta
+\import Function.Meta ($, repeat)
+\import Logic \hiding (||, byLeft, byRight)
+\import Logic.Classical
+\import Logic.Meta
+\import Meta
+\import Order.LinearOrder
+\import Order.PartialOrder
+\import Paths
+\import Paths.Meta
+\import my_prelude
+\import lambda
+
+{-
+   В данном файле есть множество утверждений, которые надо доказать.
+   Вместе они доказывают теорему Чёрча-Россера для бестипового лямбда-исчисления.
+
+   По умолчанию, за доказательство каждого факта даётся 4 балла.
+   Некоторые утверждения сложнее, их стоимость тогда указывается отдельно.
+
+   Как решать:
+   - напишите в табличку с заявками на ДЗ (вкладка "Чёрч-Россер"), какой пункт вы доказываете
+   - сделайте PR с вашим доказательством и указанием авторства рядом с леммой
+-}
+
+-- d = 1, k = 0
+\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => {?}   
+\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l => {?}
+
+{- 6 баллов -}
+\func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a) => {?}
+
+\func up-up-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (up1' k a) = up1' (suc k) (up1' d a) => {?}
+
+{- 6 баллов -}
+\func up-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (down1' k a) = down1' (suc k) (up1' d a) => {?}
+
+-- NOTE: `up1' d (down1' k a) = down1' k (up1' (suc d) a)` doesn't work for k = 0, d = 0, a = V 0
+-- up1' 0 (down1' 0 (V 0)) = down1' 0 (up1' 1 (V 0))
+-- up1' 0 (V 0) = down1' 0 (V 0)
+-- up1' 0 (V 0) = down1' 0 (V 0)
+-- V 1 = V 0
+--     k <= d -> up1' 0 (down1' k a) = down1' k (up1' (suc 0) a)
+\func up-down-comm' {a : Term} {k d : Nat} (h : (suc k <=? d) = true) : up1' d (down1' k a) = down1' k (up1' (suc d) a) => {?}
+
+{- 6 баллов -}
+\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) : 
+   down1' d (up1' (suc k) (subst a d (up1' d b))) = up1' k (down1' d (subst a d (up1' d b))) => {?}
+
+-- NOTE conter-example for k = 0:
+--   down1' 0 (subst (V 1) 0 b) != subst (down1' 0 (V 1)) 0 b =
+--                down' 0 (V 1) != subst (V 0) 0 b
+--                          V 0 != b
+\func down-subst-comm {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
+  down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) => {?}
+\func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r) => {?}
+\func up-subst-comm' {l r : Term} {k d : Nat} (h : (suc d <=? k) = true) : up1' k (subst l d r) = subst (up1' k l) d (up1' k r) => {?}
+\func subst-suc {l r : Term} {k : Nat} : subst (up1' k l) k r = up1' k l => {?}
+\func reduce-subst-after-up {l r : Term} {d : Nat} : subst (up1' d l) d r = up1' d l => {?}
+
+-- (V n+1)[k+1 := r↑][0:=(l2[k:=r])↑]↓ = ((V n+1)[0:=l2↑]↓)[k:=r]
+-- (V n+1)[k+1 := r↑][d:=(l2[k:=r])↑]↓d = ((V n+1)[d:=l2↑]↓d)[k:=r]
+-- 6 баллов
+\func subst-comm {l1 r l2 : Term} {k d : Nat} (h : (d <=? k) = true)
+  : down1' d (subst (subst l1 (suc k) (up1' d r)) d (up1' d (subst l2 k r))) = subst (down1' d (subst l1 d (up1' d l2))) k r => {?}
+  -- NOTE: Here we cannot use `down-subst-comm` due to `down1'`'s level limitation.
+  -- And using extended version of it imples contradiction. But this is still true for any `d`.
+
+\func beta*-ap-cong-left {l l' r : Term} (h : l `beta*` l') : (l @ r) `beta*` (l' @ r) => {?}
+\func beta*-ap-cong-right {l r r' : Term} (h : r `beta*` r') : (l @ r) `beta*` (l @ r') => {?}
+\func beta*-ap-cong {l l' r r' : Term} (hl : l `beta*` l') (hr : r `beta*` r') : (l @ r) `beta*` (l' @ r') => {?}
+\func beta*-L-cong {a a' : Term} (a-to-a' : a `beta*` a') : L a `beta*` L a' => {?}
+\func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' => {?}
+\func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' => {?}
+\func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' => {?}
+\func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a' => {?}
+
+{- # The Church-Rosser theorem -}
+
+{- ## Lemmas -}
+
+\func subst-lift1 {l l' r : Term} {k : Nat} (l-to-l' : l `beta` l') : (subst l k r) `beta*` (subst l' k r) => {?}
+\func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : (subst l k r) `beta*` (subst l k r') => {?}
+
+{- ## Proof
+--- 8 баллов
+- -}
+
+\func Church-Rosser-Thm {a b c : Term}
+                        (h1 : a `beta*` b)
+                        (h2 : a `beta*` c)
+  : \Sigma (d : Term) (b `beta*` d) (c `beta*` d) => {?}

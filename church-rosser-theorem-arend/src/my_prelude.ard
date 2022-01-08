@@ -1,0 +1,223 @@
+\import Algebra.Meta
+\import Arith.Nat
+\import Data.Bool
+\import Data.Or
+\import Function.Meta
+\import Logic
+\import Paths
+
+--\func \infixr 1 $ {a b : \Type} (f : a -> b) (x : a) => f x
+
+\func \infix 1 <=? (x y : Nat) : Bool \elim x, y
+  | 0, _ => true
+  | suc x, 0 => false
+  | suc x, suc y => x <=? y
+
+--\lemma l1 {x y : Nat} (h : (x <= y) = true) : x LinearOrder.<= y =>
+--  \case \elim x, \elim y \with {
+--      | 0, 0 =>     NatSemiring.<=-reflexive
+--      | 0, suc n => NatSemiring.<=-less $ NatSemiring.zero<suc
+--      | suc n, 0 => So.absurd (transport So (inv h) so) -- Not (suc n > zero)
+--      | suc a', suc b' =>
+--        \let ind_h => l1 {a'} {b'} h
+--        \in Arith.Nat.suc<=suc ind_h
+--    }
+
+\func \infix 1 ==? (x y : Nat) : Bool \elim x, y
+  | 0, 0 => true
+  | 0, suc _ => false
+  | suc _, 0 => false
+  | suc x, suc y => x ==? y
+
+\func leq-elim {k n : Nat} : ((k <=? n) = false) ||' ((k <=? n) = true)
+\elim k, n
+  | 0, 0 => byRight idp
+  | 0, suc n => byRight idp
+  | suc k, 0 => byLeft idp
+  | suc k, suc n => leq-elim {k} {n}
+
+\data \infixr 2 ||' (A B : \Type)
+  | byLeft A
+  | byRight B
+  \where {
+    \func levelProp {A B : \Prop} (e : A -> B -> Empty) (x y : ||' A B) : x = y \elim x, y
+      | byLeft a, byLeft a' => pmap byLeft (Path.inProp a a')
+      | byLeft a, byRight b => absurd (e a b)
+      | byRight b, byLeft a => absurd (e a b)
+      | byRight b, byRight b' => pmap byRight (Path.inProp b b')
+  }
+
+\func eq-elim {k n : Nat} : ((k ==? n) = false) ||' ((k ==? n) = true)
+  \elim k, n
+    | 0, 0 => byRight idp
+    | 0, suc n => byLeft idp
+    | suc k, 0 => byLeft idp
+    | suc k, suc n => eq-elim {k} {n}
+
+\func eq-sym {a b : Nat} {c : Bool} (h : (a ==? b) = c): (b ==? a) = c
+  \elim a, b
+    | 0, 0 => h
+    | 0, suc b => h
+    | suc a, 0 => h
+    | suc a, suc b => eq-sym {a} {b} h
+
+
+\func eq-next {d n : Nat} (h : (d ==? n) = true) : (d ==? suc n) = false
+  \elim d, n
+    | 0, 0 => idp
+    | 0, suc n => idp
+    | suc d, 0 => absurd $ true/=false $ inv h
+    | suc d, suc n => eq-next h
+
+\func leq-pred_false {k n : Nat} (h : (k <=? suc n) = false) : (k <=? n) = false
+\elim k, n
+  | 0, 0 => h
+  | 0, suc n => h
+  | suc k, 0 => idp
+  | suc k, suc n => leq-pred_false h
+
+\func leq-next_false {k n : Nat} (h : (k <=? n) = false) : (suc k <=? n) = false
+\elim k, n
+  | 0, 0 => idp
+  | 0, suc n => h
+  | suc k, 0 => idp
+  | suc k, suc n => leq-next_false h
+
+-- TODO: make eliminator for leq
+\func leq-bound {a b : Nat} (h1 : (a <=? b) = true) (h2 : (a <=? suc b) = false) : a = b
+  \elim a, b
+    | 0, 0 => idp
+    | 0, suc b => absurd (true/=false h2)
+    | suc a, 0 => absurd (true/=false (inv h1))
+    | suc a, suc b => cong $ leq-bound {a} {b} h1 h2
+
+\func leq-antisym {a b : Nat} (h1 : (a <=? b) = true) (h2 : (b <=? a) = true) : a = b
+  \elim a, b
+    | 0, 0 => idp
+    | 0, suc b => absurd (true/=false (inv h2))
+    | suc a, 0 => absurd (true/=false (inv h1))
+    | suc a, suc b => cong $ leq-antisym {a} {b} h1 h2
+
+\func leq-antirefl {a : Nat} : (suc a <=? a) = false
+  \elim a
+    | 0 => idp
+    | suc a => leq-antirefl {a}
+
+\func leq-pred_true {k n : Nat} (h : (suc k <=? n) = true) : (k <=? n) = true
+\elim k, n
+  | 0, 0 => idp
+  | 0, suc n => idp
+  | suc k, 0 => h
+  | suc k, suc n => leq-pred_true h
+
+\func leq-pred_true' {k n : Nat} (h1 : (k <=? suc n) = true) (h2 : (k ==? suc n) = false) : (k <=? n) = true
+\elim k, n
+  | 0, 0 => idp
+  | 0, suc n => idp
+  | suc 0, 0 => inv h2
+  | suc (suc k), 0 => h1
+  | suc k, suc n => leq-pred_true' h1 h2
+
+\func leq-pred_true'-absurd {k : Nat} (h1 : (k <=? 0) = true) (h2 : (k ==? 0) = false) : Empty
+\elim k
+  | 0 => absurd $ true/=false h2
+  | suc k => absurd $ true/=false $ inv h1
+
+\func leq-next_true {k n : Nat} (h : (k <=? n) = true) : (k <=? suc n) = true
+  \elim k, n
+    | 0, 0 => idp
+    | 0, suc n => idp
+    | suc k, 0 => absurd (true/=false (inv h))
+    | suc k, suc n => leq-next_true {k} {n} h
+
+\func leq-trans_true {a b c : Nat} (l : (a <=? b) = true) (r : (b <=? c) = true) : (a <=? c) = true
+  \elim a, b, c
+    | 0, 0, 0 => idp
+    | 0, 0, suc c => idp
+    | 0, suc b, 0 => idp
+    | 0, suc b, suc c => idp
+    | suc a, 0, 0 => l
+    | suc a, 0, suc c => absurd $ true/=false (inv l)
+    | suc a, suc b, 0 => r
+    | suc a, suc b, suc c => leq-trans_true l r
+
+\func eq-true-rewrite1 {a b c : Nat}
+                       (h1 : (a ==? b) = true)
+                       (h2 : (a <=? c) = true)
+  : (b <=? c) = true
+\elim a, b, c
+  | 0, 0, c => idp
+  | 0, suc b, c => absurd (true/=false (inv h1))
+  | suc a, 0, c => absurd (true/=false (inv h1))
+  | suc a, suc b, 0 => h2
+  | suc a, suc b, suc c => eq-true-rewrite1 {a} {b} {c} h1 h2
+
+\func eq-true-rewrite2 {a b c : Nat}
+                       (h1 : (b ==? a) = true)
+                       (h2 : (c <=? a) = true)
+  : (c <=? b) = true
+\elim a, b, c
+  | 0, 0, 0 => idp
+  | 0, 0, suc c => h2
+  | 0, suc b, 0 => idp
+  | 0, suc b, suc c => absurd (true/=false (inv h1))
+  | suc a, 0, 0 => idp
+  | suc a, 0, suc c => h1
+  | suc a, suc b, 0 => idp
+  | suc a, suc b, suc c => eq-true-rewrite2 {a} {b} {c} h1 h2
+
+\func leq-suc-absurd {a : Nat} : (suc a <=? a) = false
+\elim a
+  | 0 => idp
+  | suc a => leq-suc-absurd {a}
+
+\func leq-step1 {a b c : Nat} (l : (a <=? b) = true) (r : (suc b <=? c) = true) : (a ==? c) = false
+\elim a, b, c
+  | 0, 0, 0 => absurd (true/=false (inv r))
+  | 0, 0, suc c => idp
+  | 0, suc b, 0 => absurd (true/=false (inv r))
+  | 0, suc b, suc c => idp
+  | suc a, 0, 0 => absurd (true/=false (inv l))
+  | suc a, 0, suc c => absurd (true/=false (inv l))
+  | suc a, suc b, 0 => absurd (true/=false (inv r))
+  | suc a, suc b, suc c => leq-step1 {a} {b} {c} l r
+
+\func leq-step2 {a b : Nat} (l : (a <=? b) = false) (r : (a <=? suc b) = true): (a ==? suc b) = true
+\elim a, b
+  | 0, 0 => inv l
+  | 0, suc b => inv l
+  | suc 0, 0 => idp
+  | suc (suc a), 0 => r
+  | suc a, suc b => leq-step2 {a} {b} l r
+
+\func leq-step-false {d n : Nat} (h1 : (d <=? n) = false) (h2 : (d ==? suc n) = false) : (d <=? suc n) = false
+\elim d, n
+  | 0, _ => h1
+  | suc 0, 0 => h2
+  | suc (suc d), 0 => idp
+  | suc d, suc n => leq-step-false h1 h2
+
+\func leq-to-eq-1 {a b : Nat} (h : (a <=? b) = false) : (a ==? b) = false
+\elim a, b
+  | 0, 0 => h
+  | 0, suc b => idp
+  | suc a, 0 => idp
+  | suc a, suc b => leq-to-eq-1 {a} {b} h
+
+\func leq-to-eq-2 {a b : Nat} (h : (a <=? b) = true) : (a ==? suc b) = false
+\elim a, b
+  | 0, 0 => idp
+  | 0, suc b => idp
+  | suc a, 0 => absurd (true/=false $ inv h)
+  | suc a, suc b => leq-to-eq-2 {a} {b} h
+
+\func eq-to-leq {a b : Nat} (h : (a ==? b) = true) : (a <=? b) = true
+  \elim a, b
+    | 0, 0 => idp
+    | 0, suc b => idp
+    | suc a, 0 => h
+    | suc a, suc b => eq-to-leq h
+
+\func dec (x : Nat) : Nat \elim x
+  | 0 => 0
+  | suc n => n
