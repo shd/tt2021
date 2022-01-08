@@ -1,3 +1,5 @@
+{- General definitions. Author: Pavel Golovin -}
+
 \import Algebra.Meta
 \import Arith.Nat
 \import Data.Bool
