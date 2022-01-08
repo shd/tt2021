@@ -74,8 +74,17 @@
 
 \func beta*-ap-cong-left {l l' r : Term} (h : l `beta*` l') : (l @ r) `beta*` (l' @ r) => {?}
 \func beta*-ap-cong-right {l r r' : Term} (h : r `beta*` r') : (l @ r) `beta*` (l @ r') => {?}
-\func beta*-ap-cong {l l' r r' : Term} (hl : l `beta*` l') (hr : r `beta*` r') : (l @ r) `beta*` (l' @ r') => {?}
-\func beta*-L-cong {a a' : Term} (a-to-a' : a `beta*` a') : L a `beta*` L a' => {?}
+
+{- Author: Чернацкий Евгений -}
+\func beta*-ap-cong {l l' r r' : Term} (hl : l `beta*` l') (hr : r `beta*` r') : (l @ r) `beta*` (l' @ r')
+  => beta*-trans (beta*-ap-cong-left hl) (beta*-ap-cong-right hr)
+
+{- Author: Чернацкий Евгений -}
+\func beta*-L-cong {a a' : Term} (a-to-a' : a `beta*` a') : L a `beta*` L a' \elim a-to-a'
+  | beta*-refl l=r => beta*-refl (pmap L l=r)
+  | beta*-step beta-l-r => beta*-step (beta-lambda beta-l-r)
+  | beta*-trans beta*-l-k beta*-k-r => beta*-trans (beta*-L-cong beta*-l-k) (beta*-L-cong beta*-k-r)
+
 \func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' => {?}
 \func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' => {?}
 \func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' => {?}
