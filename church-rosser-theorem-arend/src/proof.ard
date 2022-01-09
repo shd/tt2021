@@ -85,7 +85,20 @@
 
 {- ## Lemmas -}
 
-\func subst-lift1 {l l' r : Term} {k : Nat} (l-to-l' : l `beta` l') : (subst l k r) `beta*` (subst l' k r) => {?}
+{- Author: Ярошевский Илья -}
+\func subst-lift1 {l l' r : Term} {k : Nat} (l-to-l' : l `beta` l') : (subst l k r) `beta*` (subst l' k r)
+  \elim l, l', l-to-l'
+    | V i, V j, beta-var p =>
+      beta*-refl $ pmap (\lam e => subst (V e) k r) p
+    | @ l1 r1, @ l2 r2, beta-app-left b p =>
+      beta*-ap-cong (subst-lift1 b) (beta*-refl $ pmap (\lam e => subst e k r) p)
+    | @ l1 r1, @ l2 r2, beta-app-right p b =>
+      beta*-ap-cong (beta*-refl $ pmap (\lam e => subst e k r) p) (subst-lift1 b)
+    | L l-body, L r-body, beta-lambda b =>
+      beta*-L-cong $ subst-lift1 b
+    | @ (L l-body) l-arg, red, beta-red p =>
+      beta*-step $ beta-red $ subst-comm idp *> pmap (\lam e => subst e k r) p
+
 \func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : (subst l k r) `beta*` (subst l k r') => {?}
 
 {- ## Proof
