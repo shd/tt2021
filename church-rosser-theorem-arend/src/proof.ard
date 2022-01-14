@@ -79,14 +79,25 @@
 \func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' => {?}
 \func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' => {?}
 \func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' => {?}
-\func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a' => {?}
+\func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a'
+  \elim a-to-a'
+    | beta*-refl p => beta*-refl (pmap (up1' k) p)
+    | beta*-step b => beta*-step (beta-up-comm b)
+    | beta*-trans a-to-k k-to-a' => beta*-trans (beta*-up-comm a-to-k) (beta*-up-comm k-to-a')
 
 {- # The Church-Rosser theorem -}
 
 {- ## Lemmas -}
 
 \func subst-lift1 {l l' r : Term} {k : Nat} (l-to-l' : l `beta` l') : (subst l k r) `beta*` (subst l' k r) => {?}
-\func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : (subst l k r) `beta*` (subst l k r') => {?}
+\func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : (subst l k r) `beta*` (subst l k r')
+  \elim l
+    | V n => \case (k ==? n) \as k==?n \return beta* (if (k==?n) r (V n)) (if (k==?n) r' (V n)) \with {
+      | false => beta*-refl idp
+      | true => r-to-r'
+    }
+    | @ root1 root2 => beta*-ap-cong (subst-lift2{root1} r-to-r') (subst-lift2{root2} r-to-r')
+    | L root => beta*-L-cong (subst-lift2{root} (beta*-up-comm{r}{r'}{0} r-to-r'))
 
 {- ## Proof
 --- 8 баллов
