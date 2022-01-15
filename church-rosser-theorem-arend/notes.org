@@ -1,0 +1,117 @@
+* Milestone
+  - [X] Proof for de Bruijn formalization
+  - [ ] Rewrite proof in the quotient type
+  - [ ] Fix termination problem
+  - [ ] Make proofs more readable
+    - [ ] Use more tactics
+    - [ ] refactoring
+  
+** Minor changes
+   - [ ] Use `Or` instead of `||'`
+   - [ ] Try to use `<=` instead of `<=`
+   - [ ] Add Unicode synonyms, and notation
+
+* Links
+  http://www.cs.ru.nl/~Adam.Koprowski/papers/stlc-draft-06.pdf
+  https://github.com/pi8027/lambda-calculus
+  https://github.com/JetBrains/arend-lib/tree/master/src
+  -----------------------
+  https://www.cs.cornell.edu/courses/cs4110/2012fa/lectures/lecture14.pdf
+  A head-to-head comparison of de Bruijn Indices and Names, Stefan Berghofer
+* Church-Rosser theorem for untyped lambda calculus
+
+First of all we want write more or less formal proof of the Church-Rosser theorem on the paper:
+
+*Theorem:*
+If  t_a ->^* t_b and t_a ->^* t_c so \exists t_d : t_a ->^* t_d and t_c ->^* t_d
+
+Why is it important? Because this statement
+
+Lets define what we term and reduction means:
+* Traditional way
+
+  Term ::= \lambda x. Term | Term Term | Var
+  Var \in \Sigma^*
+
+  FV(\lambda x. t) = FV(t) \ x
+  FV(t_a t_b)   = FV(t_a) \cup FV(t_b)
+  FV(x)      = {x}
+  
+** Substitution:
+
+  x[x:=t_b] \triangleq t_b
+  y[x:=t_b] \triangleq _
+  (t_a t_b)[x:=t_c] \triangleq t_a[x:=t_c] t_b[x:=t_c]
+  (\lambda x. t_a)[x:=t_b] \triangleq _
+  (\lambda y. t_a)[x:=t_b] \triangleq
+  - when y \notin FV(t_b), \lambda y. t_a[x:=t_b]
+  - when y \in FV(t_b), \lambda y'. t_a[y:=y'][x:=t_b]
+  
+** Reduction
+  
+  when x \notin FV(t_b), (\lambda x. t_a) (t_b) ->_\beta t_a[x:=t_b]
+  when x \in FV(t_b), (\lambda x. t_a) (t_b) ->_\beta t_a[x=x'][x:=t_b]
+
+  Cons: what is =x'= ?
+
+* De bruijn
+
+  Var \in Nat
+
+** Substitution:
+
+   Term [ i := Term ]
+
+   \uparrow^1_k (i)   = (i+1) when i \geq k
+   \uparrow^1_k (i)   = i     when i < k
+   \uparrow^1_k (a b) = _
+   \uparrow^1_k (\lambda. x) = \lambda. \uparrow^1_{k+1} (x)
+   \uparrow^1 \triangleq \uparrow^1_0
+
+  i [i:= t] \triangleq t
+  i [j:= t] \triangleq i
+  (t_a t_b) [k:= t_c] \triangleq t_a[k:= t_c] t_b[k:= t_c]
+  (\lambda. t_a) [k:= t_b] \triangleq \lambda. t_a[k+1:=_{}^{} t_{b}\uparrow^1]
+ 
+** Reduction
+
+   (\lambda. t_a) t_b ->_\beta t_a[0:=t_{b}\uparrow^1]\downarrow_1
+
+* Variation of \beta-reduction definition:
+
+  There are tree cases:
+  1. (\lambda x. t_a) (t_b) ->_\beta (\lambda x. t_a) (t_b')
+  2. (\lambda x. t_a) (t_b) ->_\beta (\lambda x. t_a') (t_b)
+  3. (\lambda x. t_a) (t_b) ->_\beta t_a[x:=t_b]
+  And mixes of it:
+  4. (\lambda x. t_a) (t_b) ->_\beta t_a[x:=t_b']
+  5. (\lambda x. t_a) (t_b) ->_\beta t_a'[x:=t_b]
+  6. (\lambda x. t_a) (t_b) ->_\beta t_a'[x:=t_b']
+  where t_a ->_\beta t_a', t_b ->_\beta t_b'
+
+* Proof of the theorem:
+** General case:
+   *Theorem:*
+   If  t_a ->^* t_b and t_a ->^* t_c so \exists t_d : t_a ->^* t_d and t_c ->^* t_d
+   *Proof:*
+
+   *lemma:* t_a[x:=t_b] ->_\beta^* t_a[x:=t_b']
+   Proof by induction over [:=] definition
+
+   *lemma:* t_a[x:=t_b] ->_\beta^* t_a'[x:=t_b]
+   *lemma:* t_a [y:=t_c][x:=t_b[y:=t_c]] = t_a[x:=t_b][y:=t_c]
+   
+   
+   :PROOF:
+
+   :END:
+   
+* Some footnotes examples:
+
+\lambda y. (\lambda x. (\lambda y. x)) y -> \lambda y. \lambda z. y
+\lambda y. (\lambda x. (\lambda y. 1)) 0 -> \lambda y. \lambda y. 1
+
+\Omega = (\lambda x. x x) (\lambda x. x x)
+K I \Omega -> I
+      -> K I \Omega
+ 

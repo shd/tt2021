@@ -1,0 +1,146 @@
+{- Definitions for lambda terms. Author: Pavel Golovin -}
+
+\import Algebra.Meta
+\import Algebra.Ordered
+\import Arith.Nat
+\import Data.Bool
+\import Debug.Meta
+\import Function.Meta ($, repeat)
+\import Logic \hiding (||, byLeft, byRight)
+\import Logic.Classical
+\import Logic.Meta
+\import Meta
+\import Order.LinearOrder
+\import Order.PartialOrder
+\import Paths
+\import Paths.Meta
+\import my_prelude
+
+\data Term
+  | V Nat
+  | \infixl 5 @ Term Term
+  | L Term
+
+-- Well known terms
+\func Omega => (L $ V 0 @ V 0) @ (L $ V 0 @ V 0)
+\func True  => L $ L $ V 1
+\func False => L $ L $ V 0
+\func I    => L $ V 0
+
+-- Up level all "global" binding by one
+\func up1' (k : Nat) (a : Term) : Term
+\elim a
+  | V n     => V $ if (k <=? n) (suc n) n
+  | @ a1 a2 => up1' k a1 @ up1' k a2
+  | L a     => L (up1' (suc k) a)
+
+-- TODO: redefine down to simplify proofs
+\func down1' (k : Nat) (a : Term) : Term
+\elim a
+  -- V n when n > k -> V (n-1)
+  -- V n -> V n
+  | V (suc n) => V $ if (k <=? n) n (suc n)
+  | V 0 => V 0
+  | @ a1 a2 => down1' k a1 @ down1' k a2
+  | L a     => L (down1' (suc k) a)
+
+\func up1 => up1' 0
+\func down1 => down1' 0
+
+-- a[i:=t]
+\func subst (a : Term) (i : Nat) (t : Term) : Term
+\elim a, i
+  | V j, i     => if (i ==? j) t (V j)
+  | @ a1 a2, i => subst a1 i t @ subst a2 i t
+ -- | L a', 0    => L $ subst a' 1 t
+  | L a', i    => L $ subst a' (suc i) (up1 t)
+--
+--\func red (a : Term) : Term \elim a
+--  | @ (L body) (arg) => down1 (subst body 0 (up1 arg))
+--  | a => a
+
+-- At most one reduction
+\data beta (l : Term) (r : Term) \elim l, r
+  | V i, V j => beta-var (i = j)
+  | (@ l1 r1), (@ l2 r2) => beta-app-left  (l1 `beta` l2) (r1 = r2)
+  | (@ l1 r1), (@ l2 r2) => beta-app-right (l1 = l2) (r1 `beta` r2)
+  | L (l-body), L (r-body)  => beta-lambda  (l-body `beta` r-body)
+  | @ (L (l-body)) l-arg, r => beta-red (down1 (subst l-body 0 (up1 l-arg)) = r)
+
+\data beta* (l : Term) (r : Term)
+  | beta*-refl (l = r) -- TODO: make it implicit
+  | beta*-step (beta l r)
+  | beta*-trans {k : Term} (beta* l k) (beta* k r)
+
+{- ## Auxiliary definitions
+- -}
+
+\func impossible-case1 {t1 t2 : Term} {n : Nat} (h : t1 @ t2 = V n) : Empty
+\func impossible-case2 {t1 : Term}    {n : Nat} (h : L t1 = V n)    : Empty
+\func impossible-case3 {t1 t2 t3 : Term}        (h : t1 @ t2 = L t3): Empty
+
+\func beta-refl {a : Term} : a `beta` a
+\elim a
+  | V n => beta-var idp
+  | @ a1 a2 => beta-app-left beta-refl idp
+  | L a => beta-lambda beta-refl
+
+\func beta*-var {i j : Nat} (h : i = j) : V i `beta*` V j
+  => beta*-step $ (beta-var h)
+
+{- ## Tests
+- -}
+
+-- up f in \x. f x
+\func test_up1 : up1 (L $ V 1 @ V 0) = (L $ V 2 @ V 0)
+  -- => println (up1 0 (L $ V 1 @ V 0)) $ idp
+  => idp
+\func test_up2 : up1 I = I => idp
+
+\func test_down1 : down1 (V 1) = V 0 => idp
+\func test_down2 : down1 (L $ V 0) = (L $ V 0) => idp
+\func test_down3 : down1 (L $ V 1) = (L $ V 1) => idp
+\func test_down4 : down1 (L $ V 2) = (L $ V 1) => idp
+
+\func test_down5 : down1 (down1' 2 (V 2)) = V 1 => idp
+\func test_down6 : down1' 1 (down1 (V 2)) = V 1 => idp
+
+\func test_subst1 : subst (V 0) 0 (V 1) = V 1
+  => println (subst (V 0) 0 (V 1)) $ idp
+
+-- (\x. x) y -> y
+\func test_beta1 : ((L $ V 0) @ V 1) `beta` V 1
+  => beta-red idp
+-- Omega -> Omega
+\func test_beta2 : Omega `beta` Omega
+  => beta-red idp
+-- (\x. (\y. x) I) -> (\x. x)
+-- (\x. (\x. x) I) -> (\x. I)
+\func test_beta3 : (L $ (L $ V 1) @ I) `beta` (L $ V 0)
+  => beta-lambda (beta-red idp)
+\func test_beta4 : (L $ (L $ V 0) @ I) `beta` (L $ I)
+  => beta-lambda (beta-red idp)
+
+-- (\f. f (f x)) (\x. x) -> x
+\func test_beta*1 : ((L $ V 0 @ (V 0 @ V 1)) @ (L $ V 0)) `beta*` V 0
+  => (beta*-step $ beta-red idp) `beta*-trans`
+  (beta*-step $ beta-red idp) `beta*-trans`
+  (beta*-step $ beta-red idp) `beta*-trans` beta*-refl idp
+
+{- ## Properties of the definitions
+- -}
+
+{- ### Up/Down
+- -}
+
+\func count_of_globals (a : Term) : Nat
+  => count_of_globals' 0 a
+  \where {
+    -- {here depth = 0} \. {here depth = 1} \. x {here depth = 2}
+    \func count_of_globals' (depth : Nat) (a : Term) : Nat \elim a
+      | V n => if (depth <=? n) 1 0
+      | @ a1 a2 => count_of_globals' depth a1 Nat.+ count_of_globals' depth a2
+      | L a => count_of_globals' (suc depth) a
+  }
+\func unfold_count_of_globals {a : Term} : count_of_globals a = count_of_globals.count_of_globals' 0 a => idp
+
