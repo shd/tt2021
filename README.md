@@ -142,6 +142,7 @@ https://arend-lang.github.io/documentation/tutorial/PartI/equalityex
 ### Где почитать
 + Доказательство парадокса Хуркенса (варианта парадокса Жирара) на языке Coq
 https://coq.inria.fr/library/Coq.Logic.Hurkens.html
++ Antonius J. S. Hurkens. A Simplification of Girard's Paradox
 
 ## Лекция 14
 ### Теорема Диаконеску
