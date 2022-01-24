@@ -34,7 +34,59 @@
 \func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l => {?}
 
 {- 6 баллов -}
-\func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a) => {?}
+\func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a) \elim a
+  | V n => down-down-comm-var h n
+  | @ a1 a2 => apply-eq (down-down-comm {a1} h) (down-down-comm {a2} h)
+  | L a => pmap L (down-down-comm {a} {suc k} {suc d} h)
+
+\func down-down-comm-var {k d : Nat} (h : (d <=? k) = true) (n : Nat) : down1' k (down1' d (V n)) = down1' d (down1' (suc k) (V n))
+\elim k, d, n
+  | _, _, 0 => idp
+  | k, d, 1 => \case (leq-elim {d} {0}) \with {
+    | byLeft a => rewriteEq a $ rewriteEq (leq-true-false_false h a) idp
+    | byRight a => rewriteEq a idp
+  }
+  | 0, suc d, _ => absurd (true/=false (inv h))
+  | k, d, suc (suc n) => \case (leq-elim {suc k} {suc n}) \with {
+    | byLeft a1 => \case (leq-elim {d} {suc n}) \with {
+      | byLeft a2 => rewriteEq (leq-double-pred_false a1)
+        $ rewriteEq a2
+        $ rewriteEq (leq-true-false_false h a2)
+          idp
+      | byRight a2 => rewriteEq a2
+        $ rewriteEq (leq-double-pred_false a1)
+        $ rewriteEq a2
+          idp
+    }
+    | byRight a1 => rewriteEq (leq-next_true $ leq-trans_true h $ leq-double-pred_true a1)
+      $ rewriteEq (leq-double-pred_true a1)
+      $ rewriteEq (leq-trans_true h $ leq-double-pred_true a1)
+        idp
+  }
+
+\func leq-true-false_false {a b c : Nat} (l : (b <=? a) = true) (r : (b <=? c) = false) : (a <=? c) = false
+\elim a, b, c
+  | _, 0, _ => absurd (true/=false r)
+  | 0, suc b, _ => absurd (true/=false (inv l))
+  | suc a, suc b, 0 => r
+  | suc a, suc b, suc c => leq-true-false_false l r
+
+\func leq-double-pred_true {k n : Nat} (h : (suc k <=? suc n) = true) : (k <=? n) = true
+\elim k, n
+  | 0, 0 => idp
+  | 0, suc n => idp
+  | suc k, 0 => h
+  | suc k, suc n => leq-double-pred_true h
+
+\func leq-double-pred_false {k n : Nat} (h : (suc k <=? suc n) = false) : (k <=? n) = false
+\elim k, n
+  | 0, 0 => absurd (true/=false h)
+  | 0, suc n => absurd (true/=false h)
+  | suc k, 0 => h
+  | suc k, suc n => leq-double-pred_false h
+
+\func apply-eq {a b c d : Term} (h1 : a = b) (h2 : c = d) : a @ c = b @ d
+  => rewriteI h1 (pmap (@ a) h2)
 
 \func up-up-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (up1' k a) = up1' (suc k) (up1' d a) => {?}
 
