@@ -30,8 +30,21 @@
 -}
 
 -- d = 1, k = 0
-\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => {?}   
-\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l => {?}
+\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => {?}
+
+\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l
+\elim  l, k
+  | L a, k => pmap L (down-up-simp)
+  | @ a b, k => rewrite down-up-simp (rewrite down-up-simp idp)
+  | V 0, 0 => idp
+  | V 0, (suc k) => idp
+  | V (suc n), 0 => idp
+  | V (suc n), suc k => \case (leq-elim {k} {n}) \with {
+    | byLeft k<=?n=false =>
+      \let suck<=?n=false => leq-next_false k<=?n=false
+      \in rewrite k<=?n=false (rewrite suck<=?n=false idp)
+    | byRight k<=?n=true => rewrite k<=?n=true (rewrite k<=?n=true idp)
+  }
 
 {- 6 баллов -}
 \func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a) => {?}
@@ -50,10 +63,10 @@
 \func up-down-comm' {a : Term} {k d : Nat} (h : (suc k <=? d) = true) : up1' d (down1' k a) = down1' k (up1' (suc d) a) => {?}
 
 {- 6 баллов -}
-\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) : 
+\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
    down1' d (up1' (suc k) (subst a d (up1' d b))) = up1' k (down1' d (subst a d (up1' d b))) => {?}
 
--- NOTE conter-example for k = 0:
+-- NOTE counter-example for k = 0:
 --   down1' 0 (subst (V 1) 0 b) != subst (down1' 0 (V 1)) 0 b =
 --                down' 0 (V 1) != subst (V 0) 0 b
 --                          V 0 != b
