@@ -347,8 +347,17 @@
   -- NOTE: Here we cannot use `down-subst-comm` due to `down1'`'s level limitation.
   -- And using extended version of it imples contradiction. But this is still true for any `d`.
 
-\func beta*-ap-cong-left {l l' r : Term} (h : l `beta*` l') : (l @ r) `beta*` (l' @ r) => {?}
-\func beta*-ap-cong-right {l r r' : Term} (h : r `beta*` r') : (l @ r) `beta*` (l @ r') => {?}
+{- Author: Labazov Artem -}
+\func beta*-ap-cong-left {l l' r : Term} (h : l `beta*` l') : (l @ r) `beta*` (l' @ r) \elim h
+  | beta*-refl p => beta*-refl (pmap (\lam t => t @ r) p)
+  | beta*-step b => beta*-step (beta-app-left b idp)
+  | beta*-trans h1 h2 => beta*-trans (beta*-ap-cong-left h1) (beta*-ap-cong-left h2)
+
+{- Author: Labazov Artem -}
+\func beta*-ap-cong-right {l r r' : Term} (h : r `beta*` r') : (l @ r) `beta*` (l @ r') \elim h
+  | beta*-refl p => beta*-refl (pmap (\lam t => l @ t) p)
+  | beta*-step b => beta*-step (beta-app-right idp b)
+  | beta*-trans h1 h2 => beta*-trans (beta*-ap-cong-right h1) (beta*-ap-cong-right h2)
 
 {- Author: Чернацкий Евгений -}
 \func beta*-ap-cong {l l' r r' : Term} (hl : l `beta*` l') (hr : r `beta*` r') : (l @ r) `beta*` (l' @ r')
