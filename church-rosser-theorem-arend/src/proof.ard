@@ -30,8 +30,96 @@
 -}
 
 -- d = 1, k = 0
-\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => {?}   
-\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l => {?}
+\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => sod' 0
+  \where {
+    \func sod_base {n k : Nat}
+      : count_of_globals (V n) = count_of_globals (down1' k (V n))
+    \elim n, k
+      | 0, 0 => idp
+      | 0, suc k => idp
+      | suc n, k => \case leq-elim {k} {n} \with {
+        | byLeft k<=n=false =>  rewrite k<=n=false idp
+        | byRight k<=n=true => rewrite k<=n=true idp
+      }
+      \func sod' {a : Term} {k : Nat} (d : Nat)
+        : count_of_globals.count_of_globals' d a = count_of_globals.count_of_globals' d (down1' (k Nat.+ d) a)
+      \elim a
+        | @ a b =>
+          \let
+            | a=da
+              : count_of_globals.count_of_globals' d a = count_of_globals.count_of_globals' d (down1' (k Nat.+ d) a)
+              => sod' d
+            | b=db
+              : count_of_globals.count_of_globals' d b = count_of_globals.count_of_globals' d (down1' (k Nat.+ d) b)
+              => sod' d
+          \in rewrite (a=da) (rewrite b=db idp)
+        | L a => sod' {a} (suc d)
+        | V 0 => idp
+        | V (suc n) => \case leq-elim {d} {n} \with {
+          | byLeft d>n => \case leq-elim {d} {suc n} \with {
+            | byLeft d>n+1 => \case leq-elim {k Nat.+ d} {n} \with {
+              | byLeft k+d>n => rewrite k+d>n idp
+              | byRight k+d<=n => rewrite k+d<=n (rewrite d>n+1 (rewrite d>n idp))
+            }
+            | byRight d<=n+1 =>
+              \let | n+1==?d => leq-step2 d>n d<=n+1
+                   | n+1=d => to-true-eq n+1==?d
+              \in rewrite n+1=d (rewrite suc-neq idp)
+          }
+          | byRight d<=n =>
+            \let | d<=sucn => leq-next_true d<=n
+            \in \case leq-elim {k Nat.+ d} {n} \with {
+              | byLeft k+d>n => rewrite d<=sucn (rewrite k+d>n (rewrite d<=sucn idp))
+              | byRight k+d<=n => rewrite d<=sucn (rewrite k+d<=n (rewrite d<=n idp))
+            }
+        }
+
+      \func to-true-eq {a b : Nat} (eq : (a ==? b) = true) : a = b
+      \elim a, b
+        | 0, 0 => idp
+        | 0, suc b => contradiction
+        | suc a, 0 => contradiction
+        | suc a, suc b => \case eq-elim {a} {b} \with {
+          | byLeft a!=b => contradiction
+          | byRight a==b => pmap suc (to-true-eq a==b)
+        }
+
+      \func suc-neq {a b : Nat} : (suc (a Nat.+ b) <=? b) = false =>
+          \case leq-elim {a Nat.+ b} {b} \with {
+            | byLeft a+b>b => leq-next_false a+b>b
+            | byRight a+b<=b =>
+              \let
+                | b<=a+b : (b <=? a Nat.+ b) = true => leq-trivial {b} {a}
+                | b=a+b : b = a Nat.+ b => leq-antisym  b<=a+b a+b<=b
+              \in rewriteI b=a+b leq-suc-absurd
+          }
+
+      \func leq-trivial {a b : Nat} : (a <=? b Nat.+ a) = true
+      \elim a, b
+        | 0, 0 => idp
+        | 0, suc b => idp
+        | suc a, b => leq-add leq-trivial
+
+      \func leq-add {a b : Nat} (a<=b : (a <=? b) = true) : (suc a <=? suc b) = true =>
+        \case leq-elim {suc a} {suc b} \with {
+          | byLeft a+1>b+1 => contradiction
+          | byRight a+1<=b+1 => a+1<=b+1
+        }
+  }
+
+\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l
+\elim  l, k
+  | L a, k => pmap L (down-up-simp)
+  | @ a b, k => rewrite down-up-simp (rewrite down-up-simp idp)
+  | V 0, 0 => idp
+  | V 0, (suc k) => idp
+  | V (suc n), 0 => idp
+  | V (suc n), suc k => \case (leq-elim {k} {n}) \with {
+    | byLeft k<=?n=false =>
+      \let suck<=?n=false => leq-next_false k<=?n=false
+      \in rewrite k<=?n=false (rewrite suck<=?n=false idp)
+    | byRight k<=?n=true => rewrite k<=?n=true (rewrite k<=?n=true idp)
+  }
 
 {- 6 баллов -}
 \func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a) => {?}
@@ -50,10 +138,10 @@
 \func up-down-comm' {a : Term} {k d : Nat} (h : (suc k <=? d) = true) : up1' d (down1' k a) = down1' k (up1' (suc d) a) => {?}
 
 {- 6 баллов -}
-\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) : 
+\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
    down1' d (up1' (suc k) (subst a d (up1' d b))) = up1' k (down1' d (subst a d (up1' d b))) => {?}
 
--- NOTE conter-example for k = 0:
+-- NOTE counter-example for k = 0:
 --   down1' 0 (subst (V 1) 0 b) != subst (down1' 0 (V 1)) 0 b =
 --                down' 0 (V 1) != subst (V 0) 0 b
 --                          V 0 != b
