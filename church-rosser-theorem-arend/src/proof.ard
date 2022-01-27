@@ -226,8 +226,36 @@
   down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) => {?}
 \func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r) => {?}
 \func up-subst-comm' {l r : Term} {k d : Nat} (h : (suc d <=? k) = true) : up1' k (subst l d r) = subst (up1' k l) d (up1' k r) => {?}
-\func subst-suc {l r : Term} {k : Nat} : subst (up1' k l) k r = up1' k l => {?}
-\func reduce-subst-after-up {l r : Term} {d : Nat} : subst (up1' d l) d r = up1' d l => {?}
+
+{- Gerasimov Michael -}
+\func subst-suc {l r : Term} {k : Nat} : subst (up1' k l) k r = up1' k l \elim l
+  | V n => subst-suc-lemma1 k n r
+  | Term.@ l1 l2 =>
+    \let
+      | t1 => subst-suc {l1} {r} {k}
+      | t2 => subst-suc {l2} {r} {k}
+    \in equal-Application t1 t2
+  | L l =>
+    \let
+      | t => subst-suc {l} {up1 r} {suc k}
+    \in pmap L t
+  \where {
+    \func equal-Application {a b c d : Term} (p : a = b) (q : c = d) : a Term.@ c = b Term.@ d => rewriteI p (pmap (Term.@ a) q)
+  }
+
+\func subst-suc-lemma1 (k n : Nat) (r : Term) : subst (up1' k (V n)) k r = V (if (k <=? n) (suc n) n) => \case leq-elim {k} {n} \with {
+  | byLeft a => \case eq-elim {k} {n} \with {
+    | byLeft a1 => rewrite a (rewrite a1 idp)                                                  -- (up1' k (V n)) == V (n)
+    | byRight b => absurd (true/=false (transport (\lam i => i = false) b (leq-to-eq-1 a)))    -- r == V (n)
+  }
+  | byRight b => \case eq-elim {k} {suc n} \with {
+    | byLeft a => rewrite b (rewrite a idp)                                                    -- (up1' k (V (suc n))) == V (suc n)
+    | byRight b1 => absurd (true/=false (transport (\lam i => i = false) b1 (leq-to-eq-2 b)))  -- r == V (suc n)
+  }
+}
+
+{- Gerasimov Michael -}
+\func reduce-subst-after-up {l r : Term} {d : Nat} : subst (up1' d l) d r = up1' d l => subst-suc
 
 -- (V n+1)[k+1 := r↑][0:=(l2[k:=r])↑]↓ = ((V n+1)[0:=l2↑]↓)[k:=r]
 -- (V n+1)[k+1 := r↑][d:=(l2[k:=r])↑]↓d = ((V n+1)[d:=l2↑]↓d)[k:=r]
