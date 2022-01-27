@@ -175,7 +175,16 @@
 
 \func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' => {?}
 \func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' => {?}
-\func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' => {?}
+{- Author: Михайлов Максим -}
+\func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' \elim a, a', a-to-a'
+  | V i, V j, beta-var i=j => beta-var (pmap (\lam t => if (k <=? t) (suc t) t) i=j)
+  | @ a a1, @ a' a'1, beta-app-left a-to-a' a1=a'1 => beta-app-left (beta-up-comm a-to-a') (pmap (up1' k) a1=a'1)
+  | @ a a1, @ a' a'1, beta-app-right a=a' a-to-a' => beta-app-right (pmap (up1' k) a=a') (beta-up-comm a-to-a')
+  | L a, L a', beta-lambda a-to-a' => beta-lambda $ beta-up-comm a-to-a'
+  | @ (L a) a1, a', beta-red p => beta-red $
+    pmap down1 (pmap (subst (up1' (suc k) a) 0) (up-up-comm idp) *> (inv $ up-subst-comm' idp))
+    *> up-down-comm'' idp
+    *> pmap (up1' k) p
 \func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a' => {?}
 
 {- # The Church-Rosser theorem -}
