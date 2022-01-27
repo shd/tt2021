@@ -293,9 +293,6 @@
       \in rewrite suck<=?n (rewrite b (rewrite (leq-pred_true suck<=?n) idp))
   }
 
-\func apply-eq {a b c d : Term} (h1 : a = b) (h2 : c = d) : a @ c = b @ d
-  => rewriteI h1 (pmap (@ a) h2)
-
 {- 6 баллов -}
 \func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
    down1' d (up1' (suc k) (subst a d (up1' d b))) = up1' k (down1' d (subst a d (up1' d b))) => {?}
