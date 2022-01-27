@@ -34,6 +34,7 @@
 \func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l => {?}
 
 {- 6 баллов -}
+{- author: daniil-eshkin  -}
 \func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a)
 \elim a
   | V n => down-down-comm-var h n
@@ -92,6 +93,7 @@
 \func up-up-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (up1' k a) = up1' (suc k) (up1' d a) => {?}
 
 {- 6 баллов -}
+{- author: daniil-eshkin  -}
 \func up-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (down1' k a) = down1' (suc k) (up1' d a)
 \elim a
   | V n => up-down-comm-var h n
