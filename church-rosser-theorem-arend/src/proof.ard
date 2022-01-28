@@ -368,8 +368,30 @@
   | beta*-step beta-l-r => beta*-step (beta-lambda beta-l-r)
   | beta*-trans beta*-l-k beta*-k-r => beta*-trans (beta*-L-cong beta*-l-k) (beta*-L-cong beta*-k-r)
 
-\func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' => {?}
-\func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' => {?}
+{- Author: Вихнин Фёдор -}
+\func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' \elim a, a', a-to-a'
+  | V i, V j, beta-var p => beta-down-cong-var {i} {j} {k} (beta-var p)
+  | @ a a1, @ a' a'1, beta-app-left a-to-a' a1=a'1 => beta-app-left (beta-down-cong a-to-a') (pmap (down1' k) a1=a'1)
+  | @ a a1, @ a' a'1, beta-app-right a=a' a1-to-a'1 => beta-app-right (pmap (down1' k) a=a') (beta-down-cong a1-to-a'1)
+  | L a, L a', beta-lambda a-to-a' => beta-lambda (beta-down-cong a-to-a')
+  | @ (L a) a1, a', beta-red p => beta-red $
+    pmap down1 (pmap (subst (down1' (suc k) a) 0) (up-down-comm idp)
+      *> inv (down-subst-comm idp))
+      *> inv (down-down-comm idp)
+           *> pmap (down1' k) p
+           
+\func beta-down-cong-var {i j : Nat} {k : Nat} (a-to-a' : (V i) `beta` (V j)) : down1' k (V i) `beta` down1' k (V j) \elim i, j, a-to-a'
+  | 0, 0, beta-var i=j => beta-var idp
+  | 0, suc j, beta-var i=j => contradiction
+  | suc i, 0, beta-var i=j => contradiction
+  | suc i, suc j, beta-var i=j => beta-var $ pmap (\lam t => if (k <=? t) t (suc t)) $ pmap pred i=j
+
+{- Author: Вихнин Фёдор -}
+\func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' \elim a-to-a'
+  | beta*-refl a=a' => beta*-refl $ pmap (down1' k) a=a'
+  | beta*-step beta-a-a' => beta*-step $ beta-down-cong {a} {a'} {k} beta-a-a'
+  | beta*-trans {between} a-to-between between-to-a' => beta*-trans (beta*-down-cong a-to-between) (beta*-down-cong between-to-a')
+
 {- Author: Михайлов Максим -}
 \func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' \elim a, a', a-to-a'
   | V i, V j, beta-var i=j => beta-var (pmap (\lam t => if (k <=? t) (suc t) t) i=j)
