@@ -307,8 +307,120 @@
 --                          V 0 != b
 \func down-subst-comm {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
   down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) => {?}
-\func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r) => {?}
-\func up-subst-comm' {l r : Term} {k d : Nat} (h : (suc d <=? k) = true) : up1' k (subst l d r) = subst (up1' k l) d (up1' k r) => {?}
+
+{- Author: Davydov Artyom -}
+\func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r)
+\elim l
+  | V n => up-subst-comm-base k n d r h
+  | @ l1 l2 =>
+    \let
+      | t1 => up-subst-comm {l1} {r} h
+      | t2 => up-subst-comm {l2} {r} h
+    \in apply-eq t1 t2
+  | L l =>
+    \let
+      | t => up-subst-comm {l} {up1 r} {suc k} {suc d} h
+      | s => inv $ up-up-comm {r} {k} {0} idp
+      | tR => rewrite s t
+    \in pmap L tR
+
+\func up-subst-comm-base (k n d : Nat) (r : Term) (h : (k <=? d) = true) : up1' k (if (d ==? n) r (V n)) = if (suc d ==? if (k <=? n) (suc n) n) (up1' k r) (V (if (k <=? n) (suc n) n))
+\elim k, n, d
+  | 0, 0, 0 => idp
+  | 0, 0, suc d => idp
+  | 0, suc n, 0 => idp
+  | 0, suc n, suc d => \case (eq-elim {d} {n}) \with {
+    | byLeft d==?n=false => rewrite d==?n=false idp
+    | byRight d==?n=true => rewrite d==?n=true idp
+  }
+  | suc k, 0, 0 => absurd (true/=false (inv h))
+  | suc k, 0, suc d => idp
+  | suc k, suc n, 0 => absurd (true/=false (inv h))
+  | suc k, suc n, suc d => \case (eq-elim {d} {n}) \with {
+    | byLeft d==?n=false => \case (eq-elim {suc d} {n}) \with {
+      | byLeft sucd==?n=false => \case (leq-elim {k} {n}) \with {
+        | byLeft k<=?n=false => rewrite d==?n=false (rewrite k<=?n=false (rewrite sucd==?n=false idp))
+        | byRight k<=?n=true => rewrite d==?n=false (rewrite k<=?n=true (rewrite d==?n=false idp))
+      }
+      | byRight sucd==?n=true =>
+        \let
+          | k<=?n => leq-trans_true (leq-next_true h) (eq-to-leq sucd==?n=true)
+        \in rewrite d==?n=false (rewrite k<=?n (rewrite d==?n=false idp))
+    }
+    | byRight d==?n=true =>
+      \let
+        | k<=?n => leq-trans_true h (eq-to-leq d==?n=true)
+      \in rewrite d==?n=true (rewrite k<=?n (rewrite d==?n=true idp))
+  }
+
+{- Author: Davydov Artyom -}
+\func up-subst-comm' {l r : Term} {k d : Nat} (h : (suc d <=? k) = true) : up1' k (subst l d r) = subst (up1' k l) d (up1' k r)
+\elim l
+  | V n => up-subst-comm'-base k n d r h
+  | @ l1 l2 =>
+    \let
+      | t1 => up-subst-comm' {l1} {r} h
+      | t2 => up-subst-comm' {l2} {r} h
+    \in apply-eq t1 t2
+  | L l =>
+    \let
+      | t => up-subst-comm' {l} {up1 r} {suc k} h
+      | s => inv $ up-up-comm {r} {k} {0} idp
+      | tR => rewrite s t
+    \in pmap L tR
+
+\func up-subst-comm'-base (k n d : Nat) (r : Term) (h : (suc d <=? k) = true) : up1' k (if (d ==? n) r (V n)) = if (d ==? if (k <=? n) (suc n) n) (up1' k r) (V (if (k <=? n) (suc n) n))
+\elim k, n, d
+  | 0, 0, 0 => absurd (true/=false (inv h))
+  | 0, 0, suc d => absurd (true/=false (inv h))
+  | 0, suc n, 0 => absurd (true/=false (inv h))
+  | 0, suc n, suc d => absurd (true/=false (inv h))
+  | suc k, 0, 0 => idp
+  | suc k, 0, suc d => idp
+  | suc k, suc n, 0 => \case (leq-elim {k} {n}) \with {
+    | byLeft k<=?n=false => rewrite k<=?n=false idp
+    | byRight k<=?n=true => rewrite k<=?n=true idp
+  }
+  | suc k, suc n, suc d => \case (leq-elim {k} {n}) \with {
+    | byLeft k<=?n=false => \case (eq-elim {d} {n}) \with {
+      | byLeft d==?n=false => rewrite k<=?n=false (rewrite d==?n=false (rewrite k<=?n=false idp))
+      | byRight d==?n=true => rewrite k<=?n=false (rewrite d==?n=true idp)
+    }
+    | byRight k<=?n=true => \case (eq-elim {d} {n}) \with {
+      | byLeft d==?n=false => \case (eq-elim {d} {suc n}) \with {
+        | byLeft d==?sucn=false => rewrite d==?n=false (rewrite k<=?n=true (rewrite d==?sucn=false idp))
+        | byRight d==?sucn=true =>
+          \let
+            | d=n+1 => eq-to-normal d==?sucn=true
+            | n+2<=?k => rewrite d=n+1 h
+            | n+2<=?n => leq-trans_true n+2<=?k k<=?n=true
+          \in absurd (leq-sucsucn<=?n-absurd n+2<=?n)
+      }
+      | byRight d==?n=true =>
+        \let
+          | d=n => eq-to-normal d==?n=true
+          | n+1<=?k => rewrite d=n h
+          | n+1<=?n => leq-trans_true n+1<=?k k<=?n=true
+        \in absurd (leq-sucn<=?n-absurd n+1<=?n)
+    }
+  }
+
+\func leq-sucn<=?n-absurd {n : Nat} (h : (suc n <=? n) = true) : Empty
+\elim n
+  | 0 => true/=false (inv h)
+  | suc n => leq-sucn<=?n-absurd h
+
+\func leq-sucsucn<=?n-absurd {n : Nat} (h : (suc (suc n) <=? n) = true) : Empty
+\elim n
+  | 0 => true/=false (inv h)
+  | suc n => leq-sucsucn<=?n-absurd h
+
+\func eq-to-normal {a b : Nat} (h : (a ==? b) = true) : a = b
+\elim a, b
+  | 0, 0 => idp
+  | 0, suc b => absurd (true/=false (inv h))
+  | suc a, 0 => absurd (true/=false (inv h))
+  | suc a, suc b => pmap suc (eq-to-normal h)
 
 {- Gerasimov Michael -}
 \func subst-suc {l r : Term} {k : Nat} : subst (up1' k l) k r = up1' k l \elim l
