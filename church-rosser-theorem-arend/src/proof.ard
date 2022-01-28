@@ -30,30 +30,276 @@
 -}
 
 -- d = 1, k = 0
-\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => {?}   
-\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l => {?}
+\func spec_of_down {a : Term} {k : Nat} : count_of_globals a = count_of_globals (down1' k a) => sod' 0
+  \where {
+    \func sod_base {n k : Nat}
+      : count_of_globals (V n) = count_of_globals (down1' k (V n))
+    \elim n, k
+      | 0, 0 => idp
+      | 0, suc k => idp
+      | suc n, k => \case leq-elim {k} {n} \with {
+        | byLeft k<=n=false =>  rewrite k<=n=false idp
+        | byRight k<=n=true => rewrite k<=n=true idp
+      }
+      \func sod' {a : Term} {k : Nat} (d : Nat)
+        : count_of_globals.count_of_globals' d a = count_of_globals.count_of_globals' d (down1' (k Nat.+ d) a)
+      \elim a
+        | @ a b =>
+          \let
+            | a=da
+              : count_of_globals.count_of_globals' d a = count_of_globals.count_of_globals' d (down1' (k Nat.+ d) a)
+              => sod' d
+            | b=db
+              : count_of_globals.count_of_globals' d b = count_of_globals.count_of_globals' d (down1' (k Nat.+ d) b)
+              => sod' d
+          \in rewrite (a=da) (rewrite b=db idp)
+        | L a => sod' {a} (suc d)
+        | V 0 => idp
+        | V (suc n) => \case leq-elim {d} {n} \with {
+          | byLeft d>n => \case leq-elim {d} {suc n} \with {
+            | byLeft d>n+1 => \case leq-elim {k Nat.+ d} {n} \with {
+              | byLeft k+d>n => rewrite k+d>n idp
+              | byRight k+d<=n => rewrite k+d<=n (rewrite d>n+1 (rewrite d>n idp))
+            }
+            | byRight d<=n+1 =>
+              \let | n+1==?d => leq-step2 d>n d<=n+1
+                   | n+1=d => to-true-eq n+1==?d
+              \in rewrite n+1=d (rewrite suc-neq idp)
+          }
+          | byRight d<=n =>
+            \let | d<=sucn => leq-next_true d<=n
+            \in \case leq-elim {k Nat.+ d} {n} \with {
+              | byLeft k+d>n => rewrite d<=sucn (rewrite k+d>n (rewrite d<=sucn idp))
+              | byRight k+d<=n => rewrite d<=sucn (rewrite k+d<=n (rewrite d<=n idp))
+            }
+        }
+
+      \func to-true-eq {a b : Nat} (eq : (a ==? b) = true) : a = b
+      \elim a, b
+        | 0, 0 => idp
+        | 0, suc b => contradiction
+        | suc a, 0 => contradiction
+        | suc a, suc b => \case eq-elim {a} {b} \with {
+          | byLeft a!=b => contradiction
+          | byRight a==b => pmap suc (to-true-eq a==b)
+        }
+
+      \func suc-neq {a b : Nat} : (suc (a Nat.+ b) <=? b) = false =>
+          \case leq-elim {a Nat.+ b} {b} \with {
+            | byLeft a+b>b => leq-next_false a+b>b
+            | byRight a+b<=b =>
+              \let
+                | b<=a+b : (b <=? a Nat.+ b) = true => leq-trivial {b} {a}
+                | b=a+b : b = a Nat.+ b => leq-antisym  b<=a+b a+b<=b
+              \in rewriteI b=a+b leq-suc-absurd
+          }
+
+      \func leq-trivial {a b : Nat} : (a <=? b Nat.+ a) = true
+      \elim a, b
+        | 0, 0 => idp
+        | 0, suc b => idp
+        | suc a, b => leq-add leq-trivial
+
+      \func leq-add {a b : Nat} (a<=b : (a <=? b) = true) : (suc a <=? suc b) = true =>
+        \case leq-elim {suc a} {suc b} \with {
+          | byLeft a+1>b+1 => contradiction
+          | byRight a+1<=b+1 => a+1<=b+1
+        }
+  }
+
+\func down-up-simp {l : Term} {k : Nat} : down1' k (up1' k l) = l
+\elim  l, k
+  | L a, k => pmap L (down-up-simp)
+  | @ a b, k => rewrite down-up-simp (rewrite down-up-simp idp)
+  | V 0, 0 => idp
+  | V 0, (suc k) => idp
+  | V (suc n), 0 => idp
+  | V (suc n), suc k => \case (leq-elim {k} {n}) \with {
+    | byLeft k<=?n=false =>
+      \let suck<=?n=false => leq-next_false k<=?n=false
+      \in rewrite k<=?n=false (rewrite suck<=?n=false idp)
+    | byRight k<=?n=true => rewrite k<=?n=true (rewrite k<=?n=true idp)
+  }
 
 {- 6 баллов -}
-\func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a) => {?}
+\func down-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : down1' k (down1' d a) = down1' d (down1' (suc k) a)
+\elim a
+  | V n => down-down-comm-var h n
+  | @ a1 a2 => apply-eq (down-down-comm {a1} h) (down-down-comm {a2} h)
+  | L a => pmap L (down-down-comm {a} {suc k} {suc d} h)
 
-\func up-up-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (up1' k a) = up1' (suc k) (up1' d a) => {?}
+\func down-down-comm-var {k d : Nat} (h : (d <=? k) = true) (n : Nat) : down1' k (down1' d (V n)) = down1' d (down1' (suc k) (V n))
+\elim k, d, n
+  | _, _, 0 => idp
+  | k, d, 1 => \case (leq-elim {d} {0}) \with {
+    | byLeft a => rewriteEq a $ rewriteEq (leq-true-false_false h a) idp
+    | byRight a => rewriteEq a idp
+  }
+  | 0, suc d, _ => absurd (true/=false (inv h))
+  | k, d, suc (suc n) => \case (leq-elim {suc k} {suc n}) \with {
+    | byLeft a1 => \case (leq-elim {d} {suc n}) \with {
+      | byLeft a2 => rewriteEq (leq-double-pred_false a1)
+        $ rewriteEq a2
+        $ rewriteEq (leq-true-false_false h a2)
+          idp
+      | byRight a2 => rewriteEq a2
+        $ rewriteEq (leq-double-pred_false a1)
+        $ rewriteEq a2
+          idp
+    }
+    | byRight a1 => rewriteEq (leq-next_true $ leq-trans_true h $ leq-double-pred_true a1)
+      $ rewriteEq (leq-double-pred_true a1)
+      $ rewriteEq (leq-trans_true h $ leq-double-pred_true a1)
+        idp
+  }
+
+\func leq-true-false_false {a b c : Nat} (l : (b <=? a) = true) (r : (b <=? c) = false) : (a <=? c) = false
+\elim a, b, c
+  | _, 0, _ => absurd (true/=false r)
+  | 0, suc b, _ => absurd (true/=false (inv l))
+  | suc a, suc b, 0 => r
+  | suc a, suc b, suc c => leq-true-false_false l r
+
+\func leq-double-pred_true {k n : Nat} (h : (suc k <=? suc n) = true) : (k <=? n) = true
+\elim k, n
+  | 0, 0 => idp
+  | 0, suc n => idp
+  | suc k, 0 => h
+  | suc k, suc n => leq-double-pred_true h
+
+\func leq-double-pred_false {k n : Nat} (h : (suc k <=? suc n) = false) : (k <=? n) = false
+\elim k, n
+  | 0, 0 => absurd (true/=false h)
+  | 0, suc n => absurd (true/=false h)
+  | suc k, 0 => h
+  | suc k, suc n => leq-double-pred_false h
+
+\func apply-eq {a b c d : Term} (h1 : a = b) (h2 : c = d) : a @ c = b @ d
+  => rewriteI h1 (pmap (@ a) h2)
+
+-- Author: Leonid Vasilev
+\func up-up-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (up1' k a) = up1' (suc k) (up1' d a)
+\elim a
+  | V n => up-up-comm-base h n
+  | @ a1 a2 =>
+    \let
+      | t1 => up-up-comm {a1} h
+      | t2 => up-up-comm {a2} h
+    \in apply-eq t1 t2
+  | L a =>
+    \let
+      | t => up-up-comm {a} {suc k} {suc d} h
+    \in pmap L t
+
+\func up-up-comm-base {k d : Nat} (h : (d <=? k) = true) (n : Nat) : up1' d (up1' k (V n)) = up1' (suc k) (up1' d (V n))
+\elim k, d, n
+  | 0, 0, 0 => idp
+  | 0, 0, suc n => idp
+  | 0, suc d, 0 => absurd (true/=false (inv h))
+  | 0, suc d, suc n => absurd (true/=false (inv h))
+  | suc k, 0, 0 => idp
+  | suc k, 0, suc n => \case (leq-elim {k} {n}) \with {
+    | byLeft a => rewrite a idp
+    | byRight b => rewrite b idp
+  }
+  | suc k, suc d, 0 => idp
+  | suc k, suc d, suc n => \case (leq-elim {k} {n}) \with {
+    | byLeft a => \case (leq-elim {d} {n}) \with {
+      | byLeft a1 => rewrite a (rewrite a1 (rewrite (leq-next_false a) idp))
+      | byRight b => rewrite b (rewrite a (rewrite b idp))
+    }
+    | byRight b =>
+      \let
+        | d<=?n => leq-trans_true h b
+      \in rewrite d<=?n (rewrite b (rewrite (leq-next_true d<=?n) idp))
+  }
 
 {- 6 баллов -}
-\func up-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (down1' k a) = down1' (suc k) (up1' d a) => {?}
+\func up-down-comm {a : Term} {k d : Nat} (h : (d <=? k) = true) : up1' d (down1' k a) = down1' (suc k) (up1' d a)
+\elim a
+  | V n => up-down-comm-var h n
+  | @ a1 a2 => apply-eq (up-down-comm {a1} h) (up-down-comm {a2} h)
+  | L a => pmap L (up-down-comm {a} {suc k} {suc d} h)
 
+\func up-down-comm-var {k d : Nat} (h : (d <=? k) = true) (n : Nat) : up1' d (down1' k (V n)) = down1' (suc k) (up1' d (V n))
+\elim k, d, n
+  | 0, 0, 0 => idp
+  | 0, 0, suc n => idp
+  | 0, suc d, 0 => idp
+  | 0, suc d, suc n => absurd (true/=false (inv h))
+  | suc k, 0, 0 => idp
+  | suc k, suc d, 0 => idp
+  | k, d, suc n => \case (leq-elim {k} {n}) \with {
+    | byLeft a1 => \case (leq-elim {d} {suc n}) \with {
+      | byLeft a2 => rewriteEq a1
+        $ rewriteEq a2
+        $ rewriteEq (leq-next_false a1)
+          idp
+      | byRight a2 => rewriteEq a1
+        $ rewriteEq a2
+        $ rewriteEq a1
+          idp
+    }
+    | byRight a1 => rewriteEq (leq-next_true $ leq-trans_true h $ a1)
+      $ rewriteEq a1
+      $ rewriteEq (leq-trans_true h a1)
+        idp
+  }
+
+-- Author: Leonid Vasilev
 -- NOTE: `up1' d (down1' k a) = down1' k (up1' (suc d) a)` doesn't work for k = 0, d = 0, a = V 0
 -- up1' 0 (down1' 0 (V 0)) = down1' 0 (up1' 1 (V 0))
 -- up1' 0 (V 0) = down1' 0 (V 0)
 -- up1' 0 (V 0) = down1' 0 (V 0)
 -- V 1 = V 0
 --     k <= d -> up1' 0 (down1' k a) = down1' k (up1' (suc 0) a)
-\func up-down-comm' {a : Term} {k d : Nat} (h : (suc k <=? d) = true) : up1' d (down1' k a) = down1' k (up1' (suc d) a) => {?}
+\func up-down-comm' {a : Term} {k d : Nat} (h : (suc k <=? d) = true) : up1' d (down1' k a) = down1' k (up1' (suc d) a)
+\elim a
+  | V n => up-down-comm'-base h n
+  | @ a1 a2 =>
+    \let
+      | t1 => up-down-comm' {a1} h
+      | t2 => up-down-comm' {a2} h
+    \in apply-eq t1 t2
+  | L a =>
+    \let
+      | t => up-down-comm' {a} {suc k} {suc d} h
+    \in pmap L t
+
+\func up-down-comm'-base {k d : Nat} (h : (suc k <=? d) = true) (n : Nat) : up1' d (down1' k (V n)) = down1' k (up1' (suc d) (V n))
+\elim k, d, n
+  | 0, 0, 0 => absurd (true/=false (inv h))
+  | 0, 0, suc n => idp
+  | 0, suc d, 0 => idp
+  | 0, suc d, suc n => \case (leq-elim {suc d} {n}) \with {
+    | byLeft a => rewrite a idp
+    | byRight b => rewrite b idp
+  }
+  | suc k, 0, 0 => absurd (true/=false (inv h))
+  | suc k, 0, suc n => absurd (true/=false (inv h))
+  | suc k, suc d, 0 => idp
+  | suc k, suc d, suc n => \case (leq-elim {suc d} {n}) \with {
+    | byLeft a => \case (leq-elim {suc k} {n}) \with {
+      | byLeft a1 => \case (leq-elim {d} {n}) \with {
+        | byLeft a2 => rewrite a (rewrite a1 (rewrite a2 idp))
+        | byRight b =>
+          \let
+            | suck<=?n => leq-trans_true h b
+          \in absurd (true/=false ((inv suck<=?n) *> a1))
+      }
+      | byRight b => rewrite b (rewrite a (rewrite b idp))
+    }
+    | byRight b =>
+      \let
+        | suck<=?n => leq-trans_true h (leq-pred_true b)
+      \in rewrite suck<=?n (rewrite b (rewrite (leq-pred_true suck<=?n) idp))
+  }
 
 {- 6 баллов -}
-\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) : 
+\func up-down-comm'' {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
    down1' d (up1' (suc k) (subst a d (up1' d b))) = up1' k (down1' d (subst a d (up1' d b))) => {?}
 
--- NOTE conter-example for k = 0:
+-- NOTE counter-example for k = 0:
 --   down1' 0 (subst (V 1) 0 b) != subst (down1' 0 (V 1)) 0 b =
 --                down' 0 (V 1) != subst (V 0) 0 b
 --                          V 0 != b
@@ -61,8 +307,36 @@
   down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) => {?}
 \func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r) => {?}
 \func up-subst-comm' {l r : Term} {k d : Nat} (h : (suc d <=? k) = true) : up1' k (subst l d r) = subst (up1' k l) d (up1' k r) => {?}
-\func subst-suc {l r : Term} {k : Nat} : subst (up1' k l) k r = up1' k l => {?}
-\func reduce-subst-after-up {l r : Term} {d : Nat} : subst (up1' d l) d r = up1' d l => {?}
+
+{- Gerasimov Michael -}
+\func subst-suc {l r : Term} {k : Nat} : subst (up1' k l) k r = up1' k l \elim l
+  | V n => subst-suc-lemma1 k n r
+  | Term.@ l1 l2 =>
+    \let
+      | t1 => subst-suc {l1} {r} {k}
+      | t2 => subst-suc {l2} {r} {k}
+    \in equal-Application t1 t2
+  | L l =>
+    \let
+      | t => subst-suc {l} {up1 r} {suc k}
+    \in pmap L t
+  \where {
+    \func equal-Application {a b c d : Term} (p : a = b) (q : c = d) : a Term.@ c = b Term.@ d => rewriteI p (pmap (Term.@ a) q)
+  }
+
+\func subst-suc-lemma1 (k n : Nat) (r : Term) : subst (up1' k (V n)) k r = V (if (k <=? n) (suc n) n) => \case leq-elim {k} {n} \with {
+  | byLeft a => \case eq-elim {k} {n} \with {
+    | byLeft a1 => rewrite a (rewrite a1 idp)                                                  -- (up1' k (V n)) == V (n)
+    | byRight b => absurd (true/=false (transport (\lam i => i = false) b (leq-to-eq-1 a)))    -- r == V (n)
+  }
+  | byRight b => \case eq-elim {k} {suc n} \with {
+    | byLeft a => rewrite b (rewrite a idp)                                                    -- (up1' k (V (suc n))) == V (suc n)
+    | byRight b1 => absurd (true/=false (transport (\lam i => i = false) b1 (leq-to-eq-2 b)))  -- r == V (suc n)
+  }
+}
+
+{- Gerasimov Michael -}
+\func reduce-subst-after-up {l r : Term} {d : Nat} : subst (up1' d l) d r = up1' d l => subst-suc
 
 -- (V n+1)[k+1 := r↑][0:=(l2[k:=r])↑]↓ = ((V n+1)[0:=l2↑]↓)[k:=r]
 -- (V n+1)[k+1 := r↑][d:=(l2[k:=r])↑]↓d = ((V n+1)[d:=l2↑]↓d)[k:=r]
@@ -72,10 +346,29 @@
   -- NOTE: Here we cannot use `down-subst-comm` due to `down1'`'s level limitation.
   -- And using extended version of it imples contradiction. But this is still true for any `d`.
 
-\func beta*-ap-cong-left {l l' r : Term} (h : l `beta*` l') : (l @ r) `beta*` (l' @ r) => {?}
-\func beta*-ap-cong-right {l r r' : Term} (h : r `beta*` r') : (l @ r) `beta*` (l @ r') => {?}
-\func beta*-ap-cong {l l' r r' : Term} (hl : l `beta*` l') (hr : r `beta*` r') : (l @ r) `beta*` (l' @ r') => {?}
-\func beta*-L-cong {a a' : Term} (a-to-a' : a `beta*` a') : L a `beta*` L a' => {?}
+{- Author: Labazov Artem -}
+\func beta*-ap-cong-left {l l' r : Term} (h : l `beta*` l') : (l @ r) `beta*` (l' @ r) \elim h
+  | beta*-refl p => beta*-refl (pmap (\lam t => t @ r) p)
+  | beta*-step b => beta*-step (beta-app-left b idp)
+  | beta*-trans h1 h2 => beta*-trans (beta*-ap-cong-left h1) (beta*-ap-cong-left h2)
+
+{- Author: Labazov Artem -}
+\func beta*-ap-cong-right {l r r' : Term} (h : r `beta*` r') : (l @ r) `beta*` (l @ r') \elim h
+  | beta*-refl p => beta*-refl (pmap (\lam t => l @ t) p)
+  | beta*-step b => beta*-step (beta-app-right idp b)
+  | beta*-trans h1 h2 => beta*-trans (beta*-ap-cong-right h1) (beta*-ap-cong-right h2)
+
+{- Author: Чернацкий Евгений -}
+\func beta*-ap-cong {l l' r r' : Term} (hl : l `beta*` l') (hr : r `beta*` r') : (l @ r) `beta*` (l' @ r')
+  => beta*-trans (beta*-ap-cong-left hl) (beta*-ap-cong-right hr)
+
+{- Author: Чернацкий Евгений -}
+\func beta*-L-cong {a a' : Term} (a-to-a' : a `beta*` a') : L a `beta*` L a' \elim a-to-a'
+  | beta*-refl l=r => beta*-refl (pmap L l=r)
+  | beta*-step beta-l-r => beta*-step (beta-lambda beta-l-r)
+  | beta*-trans beta*-l-k beta*-k-r => beta*-trans (beta*-L-cong beta*-l-k) (beta*-L-cong beta*-k-r)
+
+{- Author: Вихнин Фёдор -}
 \func beta-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : down1' k a `beta` down1' k a' \elim a, a', a-to-a'
   | V i, V j, beta-var p => beta-down-cong-var {i} {j} {k} (beta-var p)
   | @ a a1, @ a' a'1, beta-app-left a-to-a' a1=a'1 => beta-app-left (beta-down-cong a-to-a') (pmap (down1' k) a1=a'1)
@@ -86,28 +379,49 @@
       *> inv (down-subst-comm idp))
       *> inv (down-down-comm idp)
            *> pmap (down1' k) p
-
-
+           
 \func beta-down-cong-var {i j : Nat} {k : Nat} (a-to-a' : (V i) `beta` (V j)) : down1' k (V i) `beta` down1' k (V j) \elim i, j, a-to-a'
   | 0, 0, beta-var i=j => beta-var idp
   | 0, suc j, beta-var i=j => contradiction
   | suc i, 0, beta-var i=j => contradiction
   | suc i, suc j, beta-var i=j => beta-var $ pmap (\lam t => if (k <=? t) t (suc t)) $ pmap pred i=j
 
-
+{- Author: Вихнин Фёдор -}
 \func beta*-down-cong {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : down1' k a `beta*` down1' k a' \elim a-to-a'
   | beta*-refl a=a' => beta*-refl $ pmap (down1' k) a=a'
   | beta*-step beta-a-a' => beta*-step $ beta-down-cong {a} {a'} {k} beta-a-a'
   | beta*-trans {between} a-to-between between-to-a' => beta*-trans (beta*-down-cong a-to-between) (beta*-down-cong between-to-a')
 
-\func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' => {?}
+{- Author: Михайлов Максим -}
+\func beta-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta` a') : up1' k a `beta` up1' k a' \elim a, a', a-to-a'
+  | V i, V j, beta-var i=j => beta-var (pmap (\lam t => if (k <=? t) (suc t) t) i=j)
+  | @ a a1, @ a' a'1, beta-app-left a-to-a' a1=a'1 => beta-app-left (beta-up-comm a-to-a') (pmap (up1' k) a1=a'1)
+  | @ a a1, @ a' a'1, beta-app-right a=a' a-to-a' => beta-app-right (pmap (up1' k) a=a') (beta-up-comm a-to-a')
+  | L a, L a', beta-lambda a-to-a' => beta-lambda $ beta-up-comm a-to-a'
+  | @ (L a) a1, a', beta-red p => beta-red $
+    pmap down1 (pmap (subst (up1' (suc k) a) 0) (up-up-comm idp) *> (inv $ up-subst-comm' idp))
+    *> up-down-comm'' idp
+    *> pmap (up1' k) p
 \func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a' => {?}
 
 {- # The Church-Rosser theorem -}
 
 {- ## Lemmas -}
 
-\func subst-lift1 {l l' r : Term} {k : Nat} (l-to-l' : l `beta` l') : (subst l k r) `beta*` (subst l' k r) => {?}
+{- Author: Ярошевский Илья -}
+\func subst-lift1 {l l' r : Term} {k : Nat} (l-to-l' : l `beta` l') : (subst l k r) `beta*` (subst l' k r)
+  \elim l, l', l-to-l'
+    | V i, V j, beta-var p =>
+      beta*-refl $ pmap (\lam e => subst (V e) k r) p
+    | @ l1 r1, @ l2 r2, beta-app-left b p =>
+      beta*-ap-cong (subst-lift1 b) (beta*-refl $ pmap (\lam e => subst e k r) p)
+    | @ l1 r1, @ l2 r2, beta-app-right p b =>
+      beta*-ap-cong (beta*-refl $ pmap (\lam e => subst e k r) p) (subst-lift1 b)
+    | L l-body, L r-body, beta-lambda b =>
+      beta*-L-cong $ subst-lift1 b
+    | @ (L l-body) l-arg, red, beta-red p =>
+      beta*-step $ beta-red $ subst-comm idp *> pmap (\lam e => subst e k r) p
+
 \func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : (subst l k r) `beta*` (subst l k r') => {?}
 
 {- ## Proof
