@@ -381,7 +381,7 @@
       *> inv (down-subst-comm idp))
       *> inv (down-down-comm idp)
            *> pmap (down1' k) p
-           
+
 \func beta-down-cong-var {i j : Nat} {k : Nat} (a-to-a' : (V i) `beta` (V j)) : down1' k (V i) `beta` down1' k (V j) \elim i, j, a-to-a'
   | 0, 0, beta-var i=j => beta-var idp
   | 0, suc j, beta-var i=j => contradiction
@@ -424,7 +424,13 @@
     | @ (L l-body) l-arg, red, beta-red p =>
       beta*-step $ beta-red $ subst-comm idp *> pmap (\lam e => subst e k r) p
 
-\func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : (subst l k r) `beta*` (subst l k r') => {?}
+\func subst-lift2 {l r r' : Term} {k : Nat} (r-to-r' : r `beta*` r') : subst l k r `beta*` subst l k r' \elim l
+  | V n => \case (k ==? n) \as p \return if p r (V n) `beta*` if p r' (V n) \with {
+    | false => beta*-refl idp
+    | true => r-to-r'
+  }
+  | @ e1 e2 => beta*-ap-cong (subst-lift2 {e1} r-to-r') (subst-lift2 {e2} r-to-r')
+  | L e => beta*-L-cong (subst-lift2 {e} (beta*-up-comm {r} {r'} {0} r-to-r'))
 
 {- ## Proof
 --- 8 баллов
