@@ -516,7 +516,12 @@
     pmap down1 (pmap (subst (up1' (suc k) a) 0) (up-up-comm idp) *> (inv $ up-subst-comm' idp))
     *> up-down-comm'' idp
     *> pmap (up1' k) p
-\func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a' => {?}
+
+{- Author: Синяченко Никита -}
+\func beta*-up-comm {a a' : Term} {k : Nat} (a-to-a' : a `beta*` a') : up1' k a `beta*` up1' k a' \elim a-to-a'
+  | beta*-refl p => beta*-refl (pmap (\lam x => up1' k x) p)
+  | beta*-step b => beta*-step (beta-up-comm b)
+  | beta*-trans a-to-a1 a1-to-a2 => beta*-trans (beta*-up-comm a-to-a1) (beta*-up-comm a1-to-a2)
 
 {- # The Church-Rosser theorem -}
 
