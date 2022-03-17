@@ -305,8 +305,56 @@
 --   down1' 0 (subst (V 1) 0 b) != subst (down1' 0 (V 1)) 0 b =
 --                down' 0 (V 1) != subst (V 0) 0 b
 --                          V 0 != b
+{- Author: Labazov Artem -}
 \func down-subst-comm {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
-  down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) => {?}
+  down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) \elim a
+  | V n => down-subst-comm-lemma k n d b h
+  | @ a1 a2 => apply-eq (down-subst-comm h) (down-subst-comm h)
+  | L a => rewrite (up-down-comm idp) (pmap L (down-subst-comm {a} {up1 b} {suc k} {suc d} h))
+
+\func down-subst-comm-lemma (k n d : Nat) (b : Term) (h : (d <=? k) = true) :
+  down1' (suc k) (if (d ==? n) b (V n)) = subst (down1' (suc k) (V n)) d (down1' (suc k) b) \elim k, n, d
+  | 0, 0, 0 => idp
+  | 0, 0, suc d => idp
+  | 0, suc n, 0 => \case (leq-elim {1} {n}) \with {
+    | byLeft o<=?n=false => rewrite o<=?n=false idp
+    | byRight o<=n => \case (eq-elim {0} {n}) \with {
+      | byLeft z==?n=false => rewrite o<=n (rewrite z==?n=false idp)
+      | byRight z=n => absurd (true/=false $ inv $ eq-true-rewrite2 {n} {0} {1} z=n o<=n)
+    }
+  }
+  | 0, suc n, suc d => absurd (true/=false $ inv h)
+  | suc k, 0, 0 => idp
+  | suc k, 0, suc d => idp
+  | suc k, suc n, 0 => \case (leq-elim {suc (suc k)} {n}) \with {
+    | byLeft k+2<=?n=false => rewrite k+2<=?n=false idp
+    | byRight k+2<=n => \case (eq-elim {0} {n}) \with {
+      | byLeft z==?n=false => rewrite k+2<=n (rewrite z==?n=false idp)
+      | byRight z=n => absurd (true/=false $ inv (eq-true-rewrite2 z=n k+2<=n))
+    }
+  }
+  | suc k, suc n, suc d => \case (eq-elim {d} {n}) \with {
+    | byLeft d==?n=false => \case (leq-elim {suc (suc k)} {n}) \with {
+      | byLeft k+2<=?n=false => rewrite k+2<=?n=false (rewrite d==?n=false (rewrite k+2<=?n=false idp))
+      | byRight k+2<=n => \case (eq-elim {suc d} {n}) \with {
+        | byLeft d+1==?n=false => rewrite k+2<=n (rewrite d==?n=false (rewrite k+2<=n (rewrite d+1==?n=false idp)))
+        | byRight d+1=n =>
+          \let
+            | k+1<=?k => leq-trans_true (eq-true-rewrite2 d+1=n k+2<=n) h
+            | yyy => rewrite k+1<=?k (leq-suc-absurd {k})
+          \in absurd (true/=false yyy)
+      }
+    }
+    | byRight d=n => \case (leq-elim {suc (suc k)} {n}) \with {
+      | byLeft a => rewrite d=n (rewrite a (rewrite d=n idp))
+      | byRight b1 =>
+        \let
+          | xxx => eq-true-rewrite1 d=n h
+          | yyy => leq-trans_true b1 xxx
+          | www => rewrite (leq-pred_true yyy) $ leq-antirefl {k}
+        \in absurd (true/=false www)
+    }
+  }
 
 {- Author: Davydov Artyom -}
 \func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r)
