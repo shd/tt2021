@@ -305,8 +305,24 @@
 --   down1' 0 (subst (V 1) 0 b) != subst (down1' 0 (V 1)) 0 b =
 --                down' 0 (V 1) != subst (V 0) 0 b
 --                          V 0 != b
+{- Author: Vladislav Gusev -}
 \func down-subst-comm {a b : Term} {k d : Nat} (h : (d <=? k) = true) :
-  down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) => {?}
+  down1' (suc k) (subst a d b) = subst (down1' (suc k) a) d (down1' (suc k) b) \elim a
+  | @ a1 a2 => rewrite (down-subst-comm {a1} h) $ rewrite (down-subst-comm {a2} h) idp
+  | L a => cong $ rewrite (up-down-comm idp) $ down-subst-comm {a} {up1 b} {suc k} {suc d} h
+  | V 0 => \case eq-elim {d} {0} \with {
+    | byLeft x  => rewrite x idp
+    | byRight x => rewrite x idp
+  }
+  | V (suc n) => \case leq-elim {suc k} {n}, eq-elim {d} {suc n} \with {
+    | byLeft x,  byLeft y  => rewrite x $ rewrite y $ rewrite x $ idp
+    | byRight x, byLeft y  => rewrite x $ rewrite y $ rewrite x $ rewrite (leq-step1 h x) $ idp
+    | byLeft x,  byRight y => rewrite y $ rewrite x $ rewrite y idp
+    | byRight x, byRight y =>
+      \let
+        | v => eq-true-rewrite1 y $ leq-trans_true (leq-next_true h) x
+      \in absurd (true/=false $ rewriteI (leq-suc-absurd {n}) $ rewrite v idp)
+  }
 
 {- Author: Davydov Artyom -}
 \func up-subst-comm {l r : Term} {k d : Nat} (h : (k <=? d) = true) : up1' k (subst l d r) = subst (up1' k l) (suc d) (up1' k r)
